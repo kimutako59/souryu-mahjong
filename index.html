@@ -121,11 +121,15 @@
         }
         .score-buttons {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .score-buttons-row {
+            display: flex;
             gap: 4px;
         }
         .score-buttons button {
-            flex: 1 1 24%;
+            flex: 1;
             min-width: 0;
             padding: 4px 0;
             border: 1px solid #ccc;
@@ -369,10 +373,6 @@
                 <span class="unit">本場</span>
             </div>
         </div>
-        <div class="input-row">
-            <label>自分はすでにリーチしている（1000点供託）</label>
-            <input type="checkbox" id="riichiFlag">
-        </div>
     </div>
 
     <!-- プリセット -->
@@ -407,12 +407,16 @@
             <div class="score-col">
                 <div class="score-input">
                     <div class="score-buttons">
-                        <button type="button" onclick="adjustScore(0,-10000)">-10000</button>
-                        <button type="button" onclick="adjustScore(0,-1000)">-1000</button>
-                        <button type="button" onclick="adjustScore(0,-100)">-100</button>
-                        <button type="button" onclick="adjustScore(0,100)">+100</button>
-                        <button type="button" onclick="adjustScore(0,1000)">+1000</button>
-                        <button type="button" onclick="adjustScore(0,10000)">+10000</button>
+                        <div class="score-buttons-row">
+                            <button type="button" onclick="adjustScore(0,-100)">-100</button>
+                            <button type="button" onclick="adjustScore(0,-1000)">-1000</button>
+                            <button type="button" onclick="adjustScore(0,-10000)">-10000</button>
+                        </div>
+                        <div class="score-buttons-row">
+                            <button type="button" onclick="adjustScore(0,100)">+100</button>
+                            <button type="button" onclick="adjustScore(0,1000)">+1000</button>
+                            <button type="button" onclick="adjustScore(0,10000)">+10000</button>
+                        </div>
                     </div>
                     <input type="number" id="score0" value="25000" step="100">
                 </div>
@@ -427,12 +431,16 @@
             <div class="score-col">
                 <div class="score-input">
                     <div class="score-buttons">
-                        <button type="button" onclick="adjustScore(1,-10000)">-10000</button>
-                        <button type="button" onclick="adjustScore(1,-1000)">-1000</button>
-                        <button type="button" onclick="adjustScore(1,-100)">-100</button>
-                        <button type="button" onclick="adjustScore(1,100)">+100</button>
-                        <button type="button" onclick="adjustScore(1,1000)">+1000</button>
-                        <button type="button" onclick="adjustScore(1,10000)">+10000</button>
+                        <div class="score-buttons-row">
+                            <button type="button" onclick="adjustScore(1,-100)">-100</button>
+                            <button type="button" onclick="adjustScore(1,-1000)">-1000</button>
+                            <button type="button" onclick="adjustScore(1,-10000)">-10000</button>
+                        </div>
+                        <div class="score-buttons-row">
+                            <button type="button" onclick="adjustScore(1,100)">+100</button>
+                            <button type="button" onclick="adjustScore(1,1000)">+1000</button>
+                            <button type="button" onclick="adjustScore(1,10000)">+10000</button>
+                        </div>
                     </div>
                     <input type="number" id="score1" value="25000" step="100">
                 </div>
@@ -447,12 +455,16 @@
             <div class="score-col">
                 <div class="score-input">
                     <div class="score-buttons">
-                        <button type="button" onclick="adjustScore(2,-10000)">-10000</button>
-                        <button type="button" onclick="adjustScore(2,-1000)">-1000</button>
-                        <button type="button" onclick="adjustScore(2,-100)">-100</button>
-                        <button type="button" onclick="adjustScore(2,100)">+100</button>
-                        <button type="button" onclick="adjustScore(2,1000)">+1000</button>
-                        <button type="button" onclick="adjustScore(2,10000)">+10000</button>
+                        <div class="score-buttons-row">
+                            <button type="button" onclick="adjustScore(2,-100)">-100</button>
+                            <button type="button" onclick="adjustScore(2,-1000)">-1000</button>
+                            <button type="button" onclick="adjustScore(2,-10000)">-10000</button>
+                        </div>
+                        <div class="score-buttons-row">
+                            <button type="button" onclick="adjustScore(2,100)">+100</button>
+                            <button type="button" onclick="adjustScore(2,1000)">+1000</button>
+                            <button type="button" onclick="adjustScore(2,10000)">+10000</button>
+                        </div>
                     </div>
                     <input type="number" id="score2" value="25000" step="100">
                 </div>
@@ -467,12 +479,16 @@
             <div class="score-col">
                 <div class="score-input">
                     <div class="score-buttons">
-                        <button type="button" onclick="adjustScore(3,-10000)">-10000</button>
-                        <button type="button" onclick="adjustScore(3,-1000)">-1000</button>
-                        <button type="button" onclick="adjustScore(3,-100)">-100</button>
-                        <button type="button" onclick="adjustScore(3,100)">+100</button>
-                        <button type="button" onclick="adjustScore(3,1000)">+1000</button>
-                        <button type="button" onclick="adjustScore(3,10000)">+10000</button>
+                        <div class="score-buttons-row">
+                            <button type="button" onclick="adjustScore(3,-100)">-100</button>
+                            <button type="button" onclick="adjustScore(3,-1000)">-1000</button>
+                            <button type="button" onclick="adjustScore(3,-10000)">-10000</button>
+                        </div>
+                        <div class="score-buttons-row">
+                            <button type="button" onclick="adjustScore(3,100)">+100</button>
+                            <button type="button" onclick="adjustScore(3,1000)">+1000</button>
+                            <button type="button" onclick="adjustScore(3,10000)">+10000</button>
+                        </div>
                     </div>
                     <input type="number" id="score3" value="25000" step="100">
                 </div>
@@ -956,7 +972,6 @@
 
         let kyotaku = parseInt(document.getElementById('kyotaku').value, 10) || 0;
         const honba   = parseInt(document.getElementById('honba').value, 10) || 0;
-        const riichi  = document.getElementById('riichiFlag').checked;
 
         const resultsDiv = document.getElementById('resultArea');
         resultsDiv.innerHTML = "";
@@ -982,11 +997,6 @@
             totalsBefore[i] = parseFloat(document.getElementById('total' + i).value) || 0;
         }
 
-        // 自分リーチ → -1000点 & 供託+1本
-        if (riichi) {
-            players[myIndex].score -= 1000;
-            kyotaku += 1;
-        }
         const pot = kyotaku * 1000;
 
         const me = players[myIndex];
@@ -1239,7 +1249,7 @@
         if (!el) return;
         if (el.style.display === 'none') {
             el.style.display = 'block';
-            if (btn) btn.textContent = "詳細を隠す";
+            if (btn) btn.textContent = "詳細を隿す";
         } else {
             el.style.display = 'none';
             if (btn) btn.textContent = "詳細を表示";
@@ -1660,7 +1670,6 @@
 
         const kyotakuBase = parseInt(document.getElementById('kyotaku').value, 10) || 0;
         const honba   = parseInt(document.getElementById('honba').value, 10) || 0;
-        const riichi  = document.getElementById('riichiFlag').checked;
 
         const returnPoint = parseInt(document.getElementById('returnPoint').value, 10) || 30000;
         const okaPt = parseFloat(document.getElementById('oka').value) || 0;
@@ -1688,10 +1697,6 @@
         }
 
         let kyotaku = kyotakuBase;
-        if (riichi) {
-            players[mySeat].score -= 1000;
-            kyotaku += 1;
-        }
         const pot = kyotaku * 1000;
 
         const me = players[mySeat];
