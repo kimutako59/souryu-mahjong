@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🀄 麻雀 点差＆逆転条件＋トータルポイント計算</title>
+
+    <style>
+        body {
+            font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            background: linear-gradient(135deg, #f5f7ff, #f3fbf5);
+            color: #333;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        header {
+            background: linear-gradient(120deg, #4f86c6, #7ed6a8);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .section {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .section-title-left {
+            display: flex;
+            align-items: center;
+        }
+        .section-title-left::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 1em;
+            background: #e74c3c;
+            margin-right: 8px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        .input-row label {
+            flex: 1;
+        }
+        .input-row input,
+        .input-row select {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            text-align: right;
+            box-sizing: border-box;
+        }
+        .input-row span.unit {
+            margin-left: 6px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .player-row {
+            display: flex;
+            align-items: center;
+            background: #f9f9ff;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+        }
+        .player-row.active {
+            background: #e1fbef;
+            border: 1px solid #2ecc71;
+        }
+        .radio-col {
+            width: 40px;
+            text-align: center;
+        }
+        .name-col {
+            width: 60px;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap; /* 縦書き防止 */
+        }
+        .score-col {
+            flex: 1;
+        }
+
+        /* スコア入力（ボタン＋入力欄を縦配置） */
+        .score-input {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .score-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .score-buttons button {
+            flex: 1 1 24%;
+            min-width: 0;
+            padding: 4px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #ecf3ff;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+        .score-buttons button:hover {
+            background: #d4e4ff;
+        }
+        .score-input input {
+            padding: 4px 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            text-align: right;
+            max-width: 110px;       /* 横幅を抑えてスマホでのはみ出し防止 */
+            align-self: flex-end;   /* 右寄せ */
+        }
+
+        button.calc-btn {
+            width: 100%;
+            padding: 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        button.calc-btn:hover {
+            background: #c0392b;
+        }
+
+        .sub-btn {
+            width: 100%;
+            padding: 14px;
+            background: #bdc3c7;
+            color: #2c3e50;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        .sub-btn:hover {
+            background: #a0acb3;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            padding: 0 15px 15px;
+        }
+
+        .result-area {
+            padding: 15px;
+            background: #f4f7fb;
+            min-height: 100px;
+        }
+
+        .target-card {
+            background: white;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 5px solid #3498db;
+            transition: 0.2s;
+        }
+        .target-card-easy {
+            border-left-color: #e74c3c;
+            box-shadow: 0 0 8px rgba(231, 76, 60, 0.35);
+        }
+        .target-card-hard {
+            border-left-color: #7f8c8d;
+            opacity: 0.75;
+        }
+
+        .chance-badge {
+            background: #ffe6e0;
+            padding: 2px 6px;
+            border-radius: 10px;
+            color: #c0392b;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-right: 4px;
+        }
+
+        .target-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 4px;
+            margin-bottom: 6px;
+            color: #2980b9;
+        }
+        .target-header-right {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .card-toggle-btn {
+            padding: 2px 6px;
+            border-radius: 8px;
+            border: 1px solid #bdc3c7;
+            background: #ecf0f1;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+        .card-toggle-btn:hover {
+            background: #d0d7dd;
+        }
+
+        .condition-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+            font-size: 0.9rem;
+        }
+        .condition-label {
+            color: #7f8c8d;
+        }
+        .condition-label-strong {
+            font-weight: bold;
+            color: #34495e;
+        }
+        .condition-val {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        .condition-detail {
+            font-size: 0.75rem;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .mini-note {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+            margin-top: 6px;
+        }
+
+        .two-col {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .two-col .input-row {
+            flex: 1 1 48%;
+        }
+
+        .preset-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+        .preset-btn {
+            flex: 1 1 48%;
+            padding: 6px 4px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            border: 1px solid #c5d0dd;
+            background: #f2f6ff;
+            cursor: pointer;
+        }
+        .preset-btn:hover {
+            background: #e0ebff;
+        }
+
+        .status-summary {
+            padding: 8px 12px;
+            background: #ffffff;
+            border-radius: 6px;
+            border: 1px solid #dde4ee;
+            margin: 0 15px 10px;
+            font-size: 0.8rem;
+            color: #34495e;
+        }
+        .status-line {
+            margin-bottom: 2px;
+        }
+        .status-ok {
+            color: #27ae60;
+        }
+        .status-warn {
+            color: #e67e22;
+        }
+        .status-bad {
+            color: #c0392b;
+        }
+
+        #customResult {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            padding: 6px 8px;
+            background: #f9fbff;
+            border-radius: 4px;
+            border: 1px solid #dde4f0;
+        }
+
+        @media (max-width: 600px) {
+            .two-col .input-row {
+                flex: 1 1 100%;
+            }
+            .btn-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <header>
+        <h1>🀄 麻雀 点差＆逆転条件＋トータルポイント計算</h1>
+    </header>
+
+    <!-- 場況 -->
+    <div class="section">
+        <div class="section-title">
+            <div class="section-title-left">場況設定</div>
+        </div>
+        <div class="two-col">
+            <div class="input-row">
+                <label>供託 (リーチ棒)</label>
+                <input type="number" id="kyotaku" value="0" min="0">
+                <span class="unit">本</span>
+            </div>
+            <div class="input-row">
+                <label>本場 (積み棒)</label>
+                <input type="number" id="honba" value="0" min="0">
+                <span class="unit">本場</span>
+            </div>
+        </div>
+        <div class="input-row">
+            <label>自分はすでにリーチしている（1000点供託）</label>
+            <input type="checkbox" id="riichiFlag">
+        </div>
+    </div>
+
+    <!-- プリセット -->
+    <div class="section">
+        <div class="section-title">
+            <div class="section-title-left">よく使う場況プリセット</div>
+        </div>
+        <div class="preset-row">
+            <button type="button" class="preset-btn" onclick="applyPreset('south_flat')">
+                オーラス・自分南家・平場（供託0・本場0）
+            </button>
+            <button type="button" class="preset-btn" onclick="applyPreset('lasthand_behind')">
+                オーラス・ラス目・供託3本・本場2本（自分北家）
+            </button>
+        </div>
+        <div class="mini-note">
+            ※ プリセットは場況（親・自分の席・供託・本場）だけを簡単にセットします。点数やポイントはそのまま／あとで調整してください。
+        </div>
+    </div>
+
+    <!-- プレイヤー点数 -->
+    <div class="section">
+        <div class="section-title">
+            <div class="section-title-left">点数入力（自分の席にチェック・100点単位調整可）</div>
+        </div>
+
+        <div class="player-row" id="row-east">
+            <div class="radio-col">
+                <input type="radio" name="mySeat" value="0" onclick="highlightMe(0)">
+            </div>
+            <div class="name-col">東家</div>
+            <div class="score-col">
+                <div class="score-input">
+                    <div class="score-buttons">
+                        <button type="button" onclick="adjustScore(0,-10000)">-10000</button>
+                        <button type="button" onclick="adjustScore(0,-1000)">-1000</button>
+                        <button type="button" onclick="adjustScore(0,-100)">-100</button>
+                        <button type="button" onclick="adjustScore(0,100)">+100</button>
+                        <button type="button" onclick="adjustScore(0,1000)">+1000</button>
+                        <button type="button" onclick="adjustScore(0,10000)">+10000</button>
+                    </div>
+                    <input type="number" id="score0" value="25000" step="100">
+                </div>
+            </div>
+        </div>
+
+        <div class="player-row" id="row-south">
+            <div class="radio-col">
+                <input type="radio" name="mySeat" value="1" onclick="highlightMe(1)" checked>
+            </div>
+            <div class="name-col">南家</div>
+            <div class="score-col">
+                <div class="score-input">
+                    <div class="score-buttons">
+                        <button type="button" onclick="adjustScore(1,-10000)">-10000</button>
+                        <button type="button" onclick="adjustScore(1,-1000)">-1000</button>
+                        <button type="button" onclick="adjustScore(1,-100)">-100</button>
+                        <button type="button" onclick="adjustScore(1,100)">+100</button>
+                        <button type="button" onclick="adjustScore(1,1000)">+1000</button>
+                        <button type="button" onclick="adjustScore(1,10000)">+10000</button>
+                    </div>
+                    <input type="number" id="score1" value="25000" step="100">
+                </div>
+            </div>
+        </div>
+
+        <div class="player-row" id="row-west">
+            <div class="radio-col">
+                <input type="radio" name="mySeat" value="2" onclick="highlightMe(2)">
+            </div>
+            <div class="name-col">西家</div>
+            <div class="score-col">
+                <div class="score-input">
+                    <div class="score-buttons">
+                        <button type="button" onclick="adjustScore(2,-10000)">-10000</button>
+                        <button type="button" onclick="adjustScore(2,-1000)">-1000</button>
+                        <button type="button" onclick="adjustScore(2,-100)">-100</button>
+                        <button type="button" onclick="adjustScore(2,100)">+100</button>
+                        <button type="button" onclick="adjustScore(2,1000)">+1000</button>
+                        <button type="button" onclick="adjustScore(2,10000)">+10000</button>
+                    </div>
+                    <input type="number" id="score2" value="25000" step="100">
+                </div>
+            </div>
+        </div>
+
+        <div class="player-row" id="row-north">
+            <div class="radio-col">
+                <input type="radio" name="mySeat" value="3" onclick="highlightMe(3)">
+            </div>
+            <div class="name-col">北家</div>
+            <div class="score-col">
+                <div class="score-input">
+                    <div class="score-buttons">
+                        <button type="button" onclick="adjustScore(3,-10000)">-10000</button>
+                        <button type="button" onclick="adjustScore(3,-1000)">-1000</button>
+                        <button type="button" onclick="adjustScore(3,-100)">-100</button>
+                        <button type="button" onclick="adjustScore(3,100)">+100</button>
+                        <button type="button" onclick="adjustScore(3,1000)">+1000</button>
+                        <button type="button" onclick="adjustScore(3,10000)">+10000</button>
+                    </div>
+                    <input type="number" id="score3" value="25000" step="100">
+                </div>
+            </div>
+        </div>
+        <div class="mini-note">
+            ※ 東家を親として計算します。自分の席にラジオボタンでチェックを入れてください。
+        </div>
+    </div>
+
+    <!-- ウマ・オカ＆トータルポイント -->
+    <div class="section">
+        <div class="section-title">
+            <div class="section-title-left">ウマ・オカ＆トータルポイント設定</div>
+            <button id="umaToggleBtn" class="card-toggle-btn" type="button" onclick="toggleUmaSection()">設定を隠す</button>
+        </div>
+
+        <div id="umaSectionBody">
+            <div class="two-col">
+                <div class="input-row">
+                    <label>返し点</label>
+                    <input type="number" id="returnPoint" value="30000" step="1000">
+                    <span class="unit">点</span>
+                </div>
+                <div class="input-row">
+                    <label>オカ（1位のみ）</label>
+                    <input type="number" id="oka" value="20" step="1">
+                    <span class="unit">pt</span>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <label>ウマ（1〜4位）</label>
+                <input type="number" id="uma0" value="10" step="0.5" style="max-width:70px;">
+                <input type="number" id="uma1" value="5" step="0.5" style="max-width:70px;">
+                <input type="number" id="uma2" value="-5" step="0.5" style="max-width:70px;">
+                <input type="number" id="uma3" value="-10" step="0.5" style="max-width:70px;">
+                <span class="unit">pt</span>
+            </div>
+            <div class="mini-note">
+                ※ 1半荘の成績 = (最終持ち点 − 返し点) ÷ 1000 ＋ ウマ ＋（1位ならオカ）として計算します。<br>
+                　トータルポイントは現在値＋この半荘の成績で表示します。
+            </div>
+        </div>
+
+        <!-- 現在のトータルポイント -->
+        <div style="margin-top:10px;">
+            <div class="section-title" style="margin-bottom:5px; padding:0;">
+                <div class="section-title-left" style="margin-bottom:0;">現在のトータルポイント</div>
+            </div>
+            <div class="two-col">
+                <div class="input-row">
+                    <label>東家</label>
+                    <input type="number" id="total0" value="0.0" step="0.1">
+                    <span class="unit">pt</span>
+                </div>
+                <div class="input-row">
+                    <label>南家</label>
+                    <input type="number" id="total1" value="0.0" step="0.1">
+                    <span class="unit">pt</span>
+                </div>
+            </div>
+            <div class="two-col">
+                <div class="input-row">
+                    <label>西家</label>
+                    <input type="number" id="total2" value="0.0" step="0.1">
+                    <span class="unit">pt</span>
+                </div>
+                <div class="input-row">
+                    <label>北家</label>
+                    <input type="number" id="total3" value="0.0" step="0.1">
+                    <span class="unit">pt</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 特定の手シミュレーション -->
+    <div class="section">
+        <div class="section-title">
+            <div class="section-title-left">特定の手でのシミュレーション</div>
+        </div>
+        <div class="two-col">
+            <div class="input-row">
+                <label>翻数</label>
+                <input type="number" id="simHan" value="3" min="1" max="13">
+                <span class="unit">翻</span>
+            </div>
+            <div class="input-row">
+                <label>符</label>
+                <input type="number" id="simFu" value="40" step="10">
+                <span class="unit">符</span>
+            </div>
+        </div>
+        <div class="input-row">
+            <label>アガリ形</label>
+            <select id="simWinType" onchange="updateSimWinType()">
+                <option value="ron">ロン</option>
+                <option value="tsumo">ツモ</option>
+            </select>
+        </div>
+        <div class="input-row" id="simRonTargetRow">
+            <label>ロン相手（仮定）</label>
+            <select id="simRonTarget">
+                <option value="0">東家</option>
+                <option value="1">南家</option>
+                <option value="2">西家</option>
+                <option value="3">北家</option>
+            </select>
+        </div>
+        <div class="mini-note">
+            ※ 現在の場況・持ち点・トータルポイント・ウマオカを前提に、指定した翻・符・アガリ形で局が終わった場合の収支とトータルを計算します。<br>
+            　（自分の席は上のラジオボタンの設定を使います）
+        </div>
+        <button class="sub-btn" type="button" onclick="simulateCustomHand()">この手でどうなるか計算</button>
+        <div id="customResult" style="display:none;"></div>
+    </div>
+
+    <!-- 状況サマリー -->
+    <div id="statusSummary" class="status-summary">
+        （現在の順位サマリーはここに表示されます）
+    </div>
+
+    <!-- ボタン行 -->
+    <div class="btn-row">
+        <button class="sub-btn" type="button" onclick="randomFill()">ランダム入力</button>
+        <button class="calc-btn" type="button" onclick="calculate()">計算実行</button>
+    </div>
+
+    <div class="result-area" id="resultArea">
+        <div style="text-align:center; color:#7f8c8d; padding:20px;">
+            点数とトータルポイントを入力して「計算実行」を押してください。
+        </div>
+    </div>
+</div>
+
+<script>
+    const winds = ["東家", "南家", "西家", "北家"];
+
+    // 実戦でよく出る「符・翻」候補
+    const candidateHands = [
+        // 1翻
+        { han: 1, fu: 30 },
+        { han: 1, fu: 40 },
+        // 2翻
+        { han: 2, fu: 20 },
+        { han: 2, fu: 25 },
+        { han: 2, fu: 30 },
+        { han: 2, fu: 40 },
+        { han: 2, fu: 50 },
+        // 3翻
+        { han: 3, fu: 25 },
+        { han: 3, fu: 30 },
+        { han: 3, fu: 40 },
+        { han: 3, fu: 50 },
+        // 4翻
+        { han: 4, fu: 30 },
+        { han: 4, fu: 40 },
+        { han: 4, fu: 50 },
+        // 5翻以上（代表）
+        { han: 5, fu: 30 },
+        { han: 6, fu: 30 },
+        { han: 7, fu: 30 },
+        { han: 8, fu: 30 },
+        { han: 11, fu: 30 },
+        { han: 13, fu: 30 }
+    ];
+
+    let cardCounter = 0;
+
+    function roundUp100(x) {
+        return Math.ceil(x / 100) * 100;
+    }
+
+    // 親の点数計算
+    function scoreHandDealer(han, fu) {
+        let limitName = null;
+
+        if (han >= 13)       limitName = "役満";
+        else if (han >= 11)  limitName = "三倍満";
+        else if (han >= 8)   limitName = "倍満";
+        else if (han >= 6)   limitName = "跳満";
+        else if (han === 5 || (han === 4 && fu >= 40) || (han === 3 && fu >= 70)) {
+            limitName = "満貫";
+        }
+
+        let ron, tsumoEach;
+
+        if (limitName) {
+            if      (limitName === "満貫")   { ron = 12000; tsumoEach = 4000; }
+            else if (limitName === "跳満")   { ron = 18000; tsumoEach = 6000; }
+            else if (limitName === "倍満")   { ron = 24000; tsumoEach = 8000; }
+            else if (limitName === "三倍満") { ron = 36000; tsumoEach = 12000; }
+            else if (limitName === "役満")   { ron = 48000; tsumoEach = 16000; }
+        } else {
+            const base = fu * Math.pow(2, han + 2);
+            ron = roundUp100(base * 6);
+            tsumoEach = roundUp100(base * 2);
+        }
+
+        const label = limitName
+            ? `${limitName}（${han}翻以上）`
+            : `${fu}符${han}翻`;
+
+        return { han, fu, ron, tsumoEach, label, limitName };
+    }
+
+    // 子の点数計算
+    function scoreHandChild(han, fu) {
+        let limitName = null;
+
+        if (han >= 13)       limitName = "役満";
+        else if (han >= 11)  limitName = "三倍満";
+        else if (han >= 8)   limitName = "倍満";
+        else if (han >= 6)   limitName = "跳満";
+        else if (han === 5 || (han === 4 && fu >= 40) || (han === 3 && fu >= 70)) {
+            limitName = "満貫";
+        }
+
+        let ron, tsumoFromParent, tsumoFromChild;
+
+        if (limitName) {
+            if      (limitName === "満貫") {
+                ron = 8000;
+                tsumoFromParent = 4000;
+                tsumoFromChild  = 2000;
+            } else if (limitName === "跳満") {
+                ron = 12000;
+                tsumoFromParent = 6000;
+                tsumoFromChild  = 3000;
+            } else if (limitName === "倍満") {
+                ron = 16000;
+                tsumoFromParent = 8000;
+                tsumoFromChild  = 4000;
+            } else if (limitName === "三倍満") {
+                ron = 24000;
+                tsumoFromParent = 12000;
+                tsumoFromChild  = 6000;
+            } else if (limitName === "役満") {
+                ron = 32000;
+                tsumoFromParent = 16000;
+                tsumoFromChild  = 8000;
+            }
+        } else {
+            const base = fu * Math.pow(2, han + 2);
+            ron = roundUp100(base * 4);
+            tsumoFromParent = roundUp100(base * 2);
+            tsumoFromChild  = roundUp100(base);
+        }
+
+        const label = limitName
+            ? `${limitName}（${han}翻以上）`
+            : `${fu}符${han}翻`;
+
+        return { han, fu, ron, tsumoFromParent, tsumoFromChild, label, limitName };
+    }
+
+    function scoreHand(han, fu, isParent) {
+        if (isParent) {
+            const d = scoreHandDealer(han, fu);
+            return {
+                han,
+                fu,
+                isParent: true,
+                ron: d.ron,
+                label: d.label,
+                limitName: d.limitName,
+                tsumoType: "dealer",
+                tsumoEach: d.tsumoEach
+            };
+        } else {
+            const c = scoreHandChild(han, fu);
+            return {
+                han,
+                fu,
+                isParent: false,
+                ron: c.ron,
+                label: c.label,
+                limitName: c.limitName,
+                tsumoType: "child",
+                tsumoFromParent: c.tsumoFromParent,
+                tsumoFromChild: c.tsumoFromChild
+            };
+        }
+    }
+
+    function highlightMe(index) {
+        document.querySelectorAll('.player-row').forEach(row => row.classList.remove('active'));
+        document.querySelectorAll('.player-row')[index].classList.add('active');
+        updateStatusSummary();
+    }
+    // 初期は南家
+    highlightMe(1);
+
+    function adjustScore(seat, delta) {
+        const el = document.getElementById('score' + seat);
+        const val = parseInt(el.value, 10) || 0;
+        el.value = val + delta;
+        updateStatusSummary();
+    }
+
+    function toggleUmaSection() {
+        const body = document.getElementById('umaSectionBody');
+        const btn  = document.getElementById('umaToggleBtn');
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            btn.textContent = '設定を隠す';
+        } else {
+            body.style.display = 'none';
+            btn.textContent = '設定を表示';
+        }
+    }
+
+    function applyPreset(type) {
+        if (type === 'south_flat') {
+            document.getElementById('kyotaku').value = 0;
+            document.getElementById('honba').value   = 0;
+            const radios = document.getElementsByName('mySeat');
+            for (let i = 0; i < radios.length; i++) radios[i].checked = (i === 1);
+            highlightMe(1);
+        } else if (type === 'lasthand_behind') {
+            document.getElementById('kyotaku').value = 3;
+            document.getElementById('honba').value   = 2;
+            const radios = document.getElementsByName('mySeat');
+            for (let i = 0; i < radios.length; i++) radios[i].checked = (i === 3);
+            highlightMe(3);
+        }
+        updateStatusSummary();
+    }
+
+    function getMySeat() {
+        const radios = document.getElementsByName('mySeat');
+        for (let i = 0; i < radios.length; i++) {
+            if (radios[i].checked) return i;
+        }
+        return 0;
+    }
+
+    // ランダム入力（点棒合計=100000−供託、ポイント合計=0）
+    function randomFill() {
+        document.getElementById('kyotaku').value = Math.floor(Math.random() * 4); // 0〜3本
+        document.getElementById('honba').value   = Math.floor(Math.random() * 6); // 0〜5本
+
+        const kyotaku = parseInt(document.getElementById('kyotaku').value, 10) || 0;
+
+        const minEach = 1000;
+        const totalPoints = 100000 - kyotaku * 1000;
+        const remaining = totalPoints - 4 * minEach;
+        const chips = remaining / 100;
+
+        let rnd = [Math.random(), Math.random(), Math.random(), Math.random()];
+        let sumRnd = rnd.reduce((a, b) => a + b, 0);
+        let extraChips = [];
+        let chipSum = 0;
+        for (let i = 0; i < 4; i++) {
+            const c = Math.floor(chips * rnd[i] / sumRnd);
+            extraChips[i] = c;
+            chipSum += c;
+        }
+        let rem = chips - chipSum;
+        let idx = 0;
+        while (rem > 0) {
+            extraChips[idx % 4]++;
+            idx++;
+            rem--;
+        }
+        for (let i = 0; i < 4; i++) {
+            const s = minEach + extraChips[i] * 100;
+            document.getElementById('score' + i).value = s;
+        }
+
+        const mySeat = Math.floor(Math.random() * 4);
+        const radios = document.getElementsByName('mySeat');
+        for (let i = 0; i < radios.length; i++) {
+            radios[i].checked = (i === mySeat);
+        }
+        highlightMe(mySeat);
+
+        // トータルポイント（4人合計0pt）
+        let raw = [0, 0, 0, 0];
+        while (true) {
+            raw[0] = Math.random() * 160 - 80;
+            raw[1] = Math.random() * 160 - 80;
+            raw[2] = Math.random() * 160 - 80;
+            raw[3] = -(raw[0] + raw[1] + raw[2]);
+            if (raw[3] >= -80 && raw[3] <= 80) break;
+        }
+        let r = [0, 0, 0, 0];
+        r[0] = Math.round(raw[0] * 10) / 10;
+        r[1] = Math.round(raw[1] * 10) / 10;
+        r[2] = Math.round(raw[2] * 10) / 10;
+        r[3] = -(r[0] + r[1] + r[2]);
+        r[3] = Math.round(r[3] * 10) / 10;
+
+        for (let i = 0; i < 4; i++) {
+            document.getElementById('total' + i).value = r[i].toFixed(1);
+        }
+
+        const resultsDiv = document.getElementById('resultArea');
+        resultsDiv.innerHTML = "<div style='text-align:center; color:#7f8c8d; padding:20px;'>ランダムな状況をセットしました。「計算実行」を押してください。</div>";
+
+        updateStatusSummary();
+    }
+
+    // 難易度判定
+    function classifyDifficulty(list) {
+        let minScore = Infinity;
+        let hasAny = false;
+
+        for (const o of list) {
+            if (!o) continue;
+            if (o.keepLead) {
+                minScore = 0;
+                hasAny = true;
+                continue;
+            }
+            if (typeof o.score === "number" && o.score >= 0) {
+                if (o.score < minScore) minScore = o.score;
+                hasAny = true;
+            }
+        }
+        if (!hasAny) return "neutral";
+
+        if (minScore === 0 || minScore <= 1000) return "easy";
+        if (minScore >= 24000) return "hard";
+        return "neutral";
+    }
+
+    // 共通：配列の順位付け（値大きい＝上）
+    function rankArray(arr) {
+        const order = arr.map((v, idx) => ({ v, idx }))
+            .sort((a, b) => {
+                if (b.v !== a.v) return b.v - a.v;
+                return a.idx - b.idx;
+            });
+        const rankBySeat = {};
+        order.forEach((o, i) => {
+            rankBySeat[o.idx] = i + 1;
+        });
+        const topIdx = order[0].idx;
+        return { rankBySeat, topIdx };
+    }
+
+    // 戦略アドバイス生成
+    function buildAdvice(difficulty, me, target, scores, totalsBefore, scoreRankBySeat, totalRankBySeat) {
+        const mySeat = me.seat;
+        const myScoreRank = scoreRankBySeat[mySeat];
+        const myTotalRank = totalRankBySeat[mySeat];
+        const targetTotalRank = totalRankBySeat[target.seat];
+        const ptDiff = totalsBefore[target.seat] - totalsBefore[mySeat];
+
+        // トータルトップのときは守備寄りコメント多め
+        if (myTotalRank === 1) {
+            if (difficulty === "hard") {
+                return "総合トップのため、この相手を無理にまくりに行く必要はありません。放銃を避けつつ、現在の順位とポイントをキープする打ち回しが無難です。";
+            } else if (difficulty === "easy") {
+                return "総合トップの状態で比較的軽い条件でさらに差を広げられますが、放銃してトップ転落しないように押し引きは慎重に。リスクを取り過ぎない範囲で加点を狙う場面です。";
+            } else {
+                return "総合トップですが、この相手に対しては中程度の打点があれば差を広げられます。局の進行や場況を見て、押し過ぎない範囲で前に出るかを判断すると良いでしょう。";
+            }
+        }
+
+        // トータルビハインド側
+        if (difficulty === "easy") {
+            if (ptDiff > 0 && targetTotalRank === 1) {
+                return "この相手が総合トップで、比較的軽い手でポイント逆転が狙えます。オーラスや親番との兼ね合いを見つつ、チャンス手なら積極的にリーチ・加点を狙ってもよい場面です。";
+            } else if (ptDiff > 0) {
+                return "この相手とはポイント差がありますが、手がまとまれば十分逆転が狙える条件です。無理な押し引きではなく、手が入った局でしっかり取り切る意識が有効です。";
+            } else {
+                return "この相手にはすでにトータルでリードしていますが、さらに差を広げる好機です。他家との点差や親番も踏まえ、押し過ぎて不用意な放銃をしないようバランスよく攻めましょう。";
+            }
+        } else if (difficulty === "hard") {
+            return "この相手を逆転するには倍満級以上などかなり大きな手が必要です。無理に逆転を狙うよりも、現実的な打点でのアガリや2着/3着キープ、放銃回避を優先した方が良い場面が多いでしょう。";
+        } else {
+            return "この相手とは中〜高打点があれば逆転が見込めます。局の残り巡目や自分の手の伸びを見ながら、押し引きのバランスを取りつつチャンス局で前に出ると良いでしょう。";
+        }
+    }
+
+    function calculate() {
+        cardCounter = 0;
+
+        let kyotaku = parseInt(document.getElementById('kyotaku').value, 10) || 0;
+        const honba   = parseInt(document.getElementById('honba').value, 10) || 0;
+        const riichi  = document.getElementById('riichiFlag').checked;
+
+        const resultsDiv = document.getElementById('resultArea');
+        resultsDiv.innerHTML = "";
+
+        // プレイヤー情報
+        let players = [];
+        let scoresBefore = [];
+        let myIndex = getMySeat();
+        for (let i = 0; i < 4; i++) {
+            const s = parseInt(document.getElementById('score' + i).value, 10) || 0;
+            scoresBefore[i] = s;
+            players.push({
+                seat: i,
+                name: winds[i],
+                score: s,
+                isParent: (i === 0)
+            });
+        }
+
+        // トータルポイント（開始時）
+        const totalsBefore = [];
+        for (let i = 0; i < 4; i++) {
+            totalsBefore[i] = parseFloat(document.getElementById('total' + i).value) || 0;
+        }
+
+        // 自分リーチ → -1000点 & 供託+1本
+        if (riichi) {
+            players[myIndex].score -= 1000;
+            kyotaku += 1;
+        }
+        const pot = kyotaku * 1000;
+
+        const me = players[myIndex];
+
+        const returnPoint = parseInt(document.getElementById('returnPoint').value, 10) || 30000;
+        const okaPt = parseFloat(document.getElementById('oka').value) || 0;
+        const uma = [];
+        for (let i = 0; i < 4; i++) {
+            uma[i] = parseFloat(document.getElementById('uma' + i).value) || 0;
+        }
+
+        // 順位情報（開始時）
+        const scoreRankInfo = rankArray(scoresBefore);
+        const totalRankInfo = rankArray(totalsBefore);
+        const scoreRankBySeat = scoreRankInfo.rankBySeat;
+        const totalRankBySeat = totalRankInfo.rankBySeat;
+
+        // 点棒で負けている相手
+        let scoreTargets = players.filter(p => p.seat !== myIndex && p.score >= me.score);
+        scoreTargets.sort((a, b) => b.score - a.score);
+
+        // トータルで負けている相手
+        let pointTargets = players.filter(p => p.seat !== myIndex && totalsBefore[p.seat] >= totalsBefore[myIndex]);
+        pointTargets.sort((a, b) => totalsBefore[b.seat] - totalsBefore[a.seat]);
+
+        if (scoreTargets.length === 0 && pointTargets.length === 0) {
+            resultsDiv.innerHTML =
+                "<div style='text-align:center; padding:20px; font-weight:bold; color:#27ae60;'>" +
+                "現在、点棒もトータルポイントもトップです！<br>無理に加点を狙うより放銃回避を優先し、この局を安全に終わらせることを考えましょう。" +
+                "</div>";
+            updateStatusSummary();
+            return;
+        }
+
+        const processedSeats = new Set();
+
+        // 点棒でも負けている相手
+        scoreTargets.forEach(target => {
+            processedSeats.add(target.seat);
+            const diff = target.score - me.score;
+            const ptDiff = totalsBefore[target.seat] - totalsBefore[myIndex];
+            const alreadyLeadInPoint = (totalsBefore[myIndex] > totalsBefore[target.seat]);
+
+            let directScoreRes = null;
+            let directPointRes = null;
+            let tsumoScoreRes = null;
+            let tsumoPointRes = null;
+            let otherScoreRes = null;
+            let otherPointRes = null;
+
+            // 直撃（点数）
+            const needDirectRaw = (diff - (2 * honba * 300) - pot) / 2;
+            directScoreRes = findMinHandForRon(needDirectRaw, me.isParent);
+            if (directScoreRes) {
+                const handInfo = scoreHand(directScoreRes.han, directScoreRes.fu, me.isParent);
+                const afterPlayers = simulateDirectRon(me, target, players, handInfo.ron, pot, honba);
+                const ptInfo = calcTotalDiff(afterPlayers, me.seat, target.seat, uma, okaPt, returnPoint, totalsBefore);
+                directScoreRes.ptText = makePtText(ptInfo, target.name);
+                directScoreRes.text   = `${handInfo.label}（ロン ${handInfo.ron}点）`;
+                directScoreRes.score  = handInfo.ron;
+            }
+
+            // 直撃（ポイント）
+            if (alreadyLeadInPoint) {
+                directPointRes = {
+                    score: 0,
+                    text: "和了するだけでポイントリード維持（すでにトータルトップ）",
+                    ptText: "",
+                    han: 0,
+                    fu: 0,
+                    keepLead: true
+                };
+            } else {
+                directPointRes = findMinHandForRonPointReverse(
+                    me, target, players, pot, honba,
+                    uma, okaPt, returnPoint, totalsBefore
+                );
+            }
+
+            // ツモ（点数）
+            tsumoScoreRes = findTsumoCondition(me, target, players, pot, honba);
+            if (tsumoScoreRes) {
+                const handInfo = scoreHand(tsumoScoreRes.han, tsumoScoreRes.fu, me.isParent);
+                const afterPlayers = simulateTsumoWithHand(me, players, handInfo, pot, honba);
+                const ptInfo = calcTotalDiff(afterPlayers, me.seat, target.seat, uma, okaPt, returnPoint, totalsBefore);
+                tsumoScoreRes.ptText = makePtText(ptInfo, target.name);
+                tsumoScoreRes.text   = `${handInfo.label}（${getTsumoDesc(handInfo, me.isParent)}）`;
+                tsumoScoreRes.score  = handInfo.ron;
+            }
+
+            // ツモ（ポイント）
+            if (alreadyLeadInPoint) {
+                tsumoPointRes = {
+                    score: 0,
+                    text: "和了するだけでポイントリード維持（すでにトータルトップ）",
+                    ptText: "",
+                    han: 0,
+                    fu: 0,
+                    keepLead: true
+                };
+            } else {
+                tsumoPointRes = findTsumoPointReverse(
+                    me, target, players, pot, honba,
+                    uma, okaPt, returnPoint, totalsBefore
+                );
+            }
+
+            // 脇出（点数）
+            const needOtherRaw = diff - honba * 300 - pot;
+            otherScoreRes = findMinHandForRon(needOtherRaw, me.isParent);
+            if (otherScoreRes) {
+                const handInfo = scoreHand(otherScoreRes.han, otherScoreRes.fu, me.isParent);
+                const afterPlayers = simulateSideRon(me, target, players, handInfo.ron, pot, honba);
+                const ptInfo = calcTotalDiff(afterPlayers, me.seat, target.seat, uma, okaPt, returnPoint, totalsBefore);
+                otherScoreRes.ptText = makePtText(ptInfo, target.name);
+                otherScoreRes.text   = `${handInfo.label}（ロン ${handInfo.ron}点）`;
+                otherScoreRes.score  = handInfo.ron;
+            }
+
+            // 脇出（ポイント）
+            if (alreadyLeadInPoint) {
+                otherPointRes = {
+                    score: 0,
+                    text: "和了するだけでポイントリード維持（すでにトータルトップ）",
+                    ptText: "",
+                    han: 0,
+                    fu: 0,
+                    keepLead: true
+                };
+            } else {
+                otherPointRes = findMinHandForSideRonPointReverse(
+                    me, target, players, pot, honba,
+                    uma, okaPt, returnPoint, totalsBefore
+                );
+            }
+
+            const difficulty = classifyDifficulty([
+                directScoreRes, tsumoScoreRes, otherScoreRes,
+                directPointRes, tsumoPointRes, otherPointRes
+            ]);
+
+            let cardClass = "target-card";
+            let highlightIcon = "";
+            let collapsed = false;
+
+            if (difficulty === "easy") {
+                cardClass += " target-card-easy";
+                highlightIcon = '<span class="chance-badge">チャンス！</span>';
+            } else if (difficulty === "hard") {
+                cardClass += " target-card-hard";
+                collapsed = true;
+            }
+
+            const cardId = `cardBody_${cardCounter++}`;
+            const bodyStyle = collapsed ? " style='display:none;'" : "";
+            const toggleLabel = collapsed ? "詳細を表示" : "詳細を隠す";
+
+            let html = `<div class="${cardClass}">`;
+            html += `<div class="target-header">
+                        <span>${highlightIcon}打倒: ${target.name}</span>
+                        <div class="target-header-right">
+                            <span>点差: ${diff}点 / Pt差: ${ptDiff.toFixed(1)}pt</span>
+                            <button type="button" class="card-toggle-btn" onclick="toggleCardBody('${cardId}', this)">${toggleLabel}</button>
+                        </div>
+                     </div>`;
+            html += `<div id="${cardId}"${bodyStyle}>`;
+
+            html += makeRowDual("直撃", directScoreRes, directPointRes);
+            html += makeRowDual("ツモ", tsumoScoreRes, tsumoPointRes);
+            html += makeRowDual("脇・出", otherScoreRes, otherPointRes, "他家からロン（点数が一番低い他家を放銃者と仮定）");
+
+            const advice = buildAdvice(difficulty, me, target, scoresBefore, totalsBefore, scoreRankBySeat, totalRankBySeat);
+            html += `<div class="mini-note"><strong>戦略アドバイス：</strong>${advice}</div>`;
+
+            html += `</div></div>`;
+            resultsDiv.innerHTML += html;
+        });
+
+        // 点棒では勝っているが、トータルで負けている相手
+        pointTargets.forEach(target => {
+            if (processedSeats.has(target.seat)) return;
+
+            const ptDiff = totalsBefore[target.seat] - totalsBefore[myIndex];
+            const scoreDiff = target.score - me.score;
+
+            let directScoreRes = null;
+            let tsumoScoreRes  = null;
+            let otherScoreRes  = null;
+
+            let directPointRes = findMinHandForRonPointReverse(
+                me, target, players, pot, honba,
+                uma, okaPt, returnPoint, totalsBefore
+            );
+            let tsumoPointRes = findTsumoPointReverse(
+                me, target, players, pot, honba,
+                uma, okaPt, returnPoint, totalsBefore
+            );
+            let otherPointRes = findMinHandForSideRonPointReverse(
+                me, target, players, pot, honba,
+                uma, okaPt, returnPoint, totalsBefore
+            );
+
+            const difficulty = classifyDifficulty([
+                directScoreRes, tsumoScoreRes, otherScoreRes,
+                directPointRes, tsumoPointRes, otherPointRes
+            ]);
+
+            let cardClass = "target-card";
+            let highlightIcon = "";
+            let collapsed = false;
+
+            if (difficulty === "easy") {
+                cardClass += " target-card-easy";
+                highlightIcon = '<span class="chance-badge">チャンス！</span>';
+            } else if (difficulty === "hard") {
+                cardClass += " target-card-hard";
+                collapsed = true;
+            }
+
+            const cardId = `cardBody_${cardCounter++}`;
+            const bodyStyle = collapsed ? " style='display:none;'" : "";
+            const toggleLabel = collapsed ? "詳細を表示" : "詳細を隠す";
+
+            let html = `<div class="${cardClass}">`;
+            html += `<div class="target-header">
+                        <span>${highlightIcon}打倒: ${target.name}</span>
+                        <div class="target-header-right">
+                            <span>Pt差: ${ptDiff.toFixed(1)}pt / 点差: ${scoreDiff}点</span>
+                            <button type="button" class="card-toggle-btn" onclick="toggleCardBody('${cardId}', this)">${toggleLabel}</button>
+                        </div>
+                     </div>`;
+            html += `<div id="${cardId}"${bodyStyle}>`;
+
+            html += makeRowDual("直撃", directScoreRes, directPointRes);
+            html += makeRowDual("ツモ", tsumoScoreRes, tsumoPointRes);
+            html += makeRowDual("脇・出", otherScoreRes, otherPointRes, "他家からロン（点数が一番低い他家を放銃者と仮定）");
+
+            const advice = buildAdvice(difficulty, me, target, scoresBefore, totalsBefore, scoreRankBySeat, totalRankBySeat);
+            html += `<div class="mini-note"><strong>戦略アドバイス：</strong>${advice}</div>`;
+
+            html += `</div></div>`;
+            resultsDiv.innerHTML += html;
+        });
+
+        updateStatusSummary();
+    }
+
+    function toggleCardBody(id, btn) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (el.style.display === 'none') {
+            el.style.display = 'block';
+            if (btn) btn.textContent = "詳細を隠す";
+        } else {
+            el.style.display = 'none';
+            if (btn) btn.textContent = "詳細を表示";
+        }
+    }
+
+    function findMinHandForRon(threshold, isParent) {
+        if (threshold <= 0) {
+            const baseHand = candidateHands[0];
+            const h = scoreHand(baseHand.han, baseHand.fu, isParent);
+            return {
+                score: 0,
+                text: `アガりさえすれば逆転（${h.label}以上）`,
+                han: baseHand.han,
+                fu: baseHand.fu
+            };
+        }
+
+        let best = null;
+        for (const cand of candidateHands) {
+            const h = scoreHand(cand.han, cand.fu, isParent);
+            if (h.ron > threshold) {
+                if (!best || h.ron < best.score) {
+                    best = {
+                        score: h.ron,
+                        text: h.label,
+                        han: cand.han,
+                        fu: cand.fu
+                    };
+                }
+            }
+        }
+        return best;
+    }
+
+    function findTsumoCondition(me, target, players, pot, honba) {
+        const sortedCand = [...candidateHands].sort((a, b) => {
+            const pa = scoreHand(a.han, a.fu, me.isParent).ron;
+            const pb = scoreHand(b.han, b.fu, me.isParent).ron;
+            return pa - pb;
+        });
+
+        for (const cand of sortedCand) {
+            const handInfo = scoreHand(cand.han, cand.fu, me.isParent);
+            const after = simulateTsumoWithHand(me, players, handInfo, pot, honba);
+            const myAfter = after[me.seat].score;
+            const targetAfter = after[target.seat].score;
+            if (myAfter > targetAfter) {
+                return {
+                    score: handInfo.ron,
+                    text: handInfo.label,
+                    han: cand.han,
+                    fu: cand.fu
+                };
+            }
+        }
+        return null;
+    }
+
+    function findMinHandForRonPointReverse(
+        me, target, players, pot, honba,
+        uma, okaPt, returnPoint, totalsBefore
+    ) {
+        const sortedCand = [...candidateHands].sort((a, b) => {
+            const pa = scoreHand(a.han, a.fu, me.isParent).ron;
+            const pb = scoreHand(b.han, b.fu, me.isParent).ron;
+            return pa - pb;
+        });
+
+        for (const cand of sortedCand) {
+            const handInfo = scoreHand(cand.han, cand.fu, me.isParent);
+            const afterPlayers = simulateDirectRon(me, target, players, handInfo.ron, pot, honba);
+            const ptInfo = calcTotalDiff(afterPlayers, me.seat, target.seat, uma, okaPt, returnPoint, totalsBefore);
+            if (ptInfo.diffAfter > 0) {
+                return {
+                    score: handInfo.ron,
+                    text: `${handInfo.label}（ロン ${handInfo.ron}点）`,
+                    ptText: makePtText(ptInfo, target.name),
+                    han: cand.han,
+                    fu: cand.fu
+                };
+            }
+        }
+        return null;
+    }
+
+    function findTsumoPointReverse(
+        me, target, players, pot, honba,
+        uma, okaPt, returnPoint, totalsBefore
+    ) {
+        const sortedCand = [...candidateHands].sort((a, b) => {
+            const pa = scoreHand(a.han, a.fu, me.isParent).ron;
+            const pb = scoreHand(b.han, b.fu, me.isParent).ron;
+            return pa - pb;
+        });
+
+        for (const cand of sortedCand) {
+            const handInfo = scoreHand(cand.han, cand.fu, me.isParent);
+            const afterPlayers = simulateTsumoWithHand(me, players, handInfo, pot, honba);
+            const ptInfo = calcTotalDiff(afterPlayers, me.seat, target.seat, uma, okaPt, returnPoint, totalsBefore);
+            if (ptInfo.diffAfter > 0) {
+                return {
+                    score: handInfo.ron,
+                    text: `${handInfo.label}（${getTsumoDesc(handInfo, me.isParent)}）`,
+                    ptText: makePtText(ptInfo, target.name),
+                    han: cand.han,
+                    fu: cand.fu
+                };
+            }
+        }
+        return null;
+    }
+
+    function findMinHandForSideRonPointReverse(
+        me, target, players, pot, honba,
+        uma, okaPt, returnPoint, totalsBefore
+    ) {
+        const sortedCand = [...candidateHands].sort((a, b) => {
+            const pa = scoreHand(a.han, a.fu, me.isParent).ron;
+            const pb = scoreHand(b.han, b.fu, me.isParent).ron;
+            return pa - pb;
+        });
+
+        for (const cand of sortedCand) {
+            const handInfo = scoreHand(cand.han, cand.fu, me.isParent);
+            const afterPlayers = simulateSideRon(me, target, players, handInfo.ron, pot, honba);
+            const ptInfo = calcTotalDiff(afterPlayers, me.seat, target.seat, uma, okaPt, returnPoint, totalsBefore);
+            if (ptInfo.diffAfter > 0) {
+                return {
+                    score: handInfo.ron,
+                    text: `${handInfo.label}（ロン ${handInfo.ron}点）`,
+                    ptText: makePtText(ptInfo, target.name),
+                    han: cand.han,
+                    fu: cand.fu
+                };
+            }
+        }
+        return null;
+    }
+
+    function makeRowDual(label, scoreRes, pointRes, extraDesc) {
+        if (!scoreRes && !pointRes) {
+            return `
+                <div class="condition-row">
+                    <span class="condition-label">${label}</span>
+                    <span class="condition-val" style="color:#95a5a6;">この条件では逆転不可</span>
+                </div>
+            `;
+        }
+
+        let html = `<div class="condition-row"><span class="condition-label">${label}</span><span></span></div>`;
+
+        const sameHand =
+            scoreRes && pointRes &&
+            !pointRes?.keepLead &&
+            scoreRes.han === pointRes.han &&
+            scoreRes.fu === pointRes.fu &&
+            scoreRes.score === pointRes.score;
+
+        if (sameHand) {
+            let scoreDisplay = scoreRes.score >= 32000
+                ? "役満級"
+                : (scoreRes.score > 0 ? scoreRes.score + "点" : "条件達成済");
+            html += `
+                <div class="condition-row">
+                    <span class="condition-label condition-label-strong">点数・ポイントともに逆転</span>
+                    <span class="condition-val">${scoreDisplay}</span>
+                </div>
+                <div class="condition-detail">
+                    ${scoreRes.text}<br>
+                    ${scoreRes.ptText || ""}
+                    ${extraDesc ? "<br>" + extraDesc : ""}
+                </div>
+            `;
+        } else {
+            if (scoreRes) {
+                let sd = scoreRes.score >= 32000
+                    ? "役満級"
+                    : (scoreRes.score > 0 ? scoreRes.score + "点" : "条件達成済");
+                html += `
+                    <div class="condition-row">
+                        <span class="condition-label condition-label-strong">点数逆転</span>
+                        <span class="condition-val">${sd}</span>
+                    </div>
+                    <div class="condition-detail">
+                        ${scoreRes.text}<br>
+                        ${scoreRes.ptText || ""}
+                        ${extraDesc ? "<br>" + extraDesc : ""}
+                    </div>
+                `;
+            }
+            if (pointRes) {
+                const isKeep = pointRes.keepLead === true;
+                const labelText = isKeep ? "ポイント維持" : "ポイント逆転";
+                let pd;
+                if (isKeep) {
+                    pd = "和了するだけ";
+                } else {
+                    pd = pointRes.score >= 32000
+                        ? "役満級"
+                        : (pointRes.score > 0 ? pointRes.score + "点" : "条件達成済");
+                }
+                html += `
+                    <div class="condition-row">
+                        <span class="condition-label condition-label-strong">${labelText}</span>
+                        <span class="condition-val">${pd}</span>
+                    </div>
+                    <div class="condition-detail">
+                        ${pointRes.text}<br>
+                        ${pointRes.ptText || ""}
+                        ${extraDesc && !scoreRes ? "<br>" + (extraDesc || "") : ""}
+                    </div>
+                `;
+            }
+        }
+        return html;
+    }
+
+    function clonePlayers(players) {
+        return players.map(p => ({ ...p }));
+    }
+
+    function simulateDirectRon(me, target, players, ronPoint, pot, honba) {
+        const after = clonePlayers(players);
+        const honbaBonus = honba * 300;
+        after[me.seat].score     += ronPoint + honbaBonus + pot;
+        after[target.seat].score -= ronPoint + honbaBonus;
+        return after;
+    }
+
+    function simulateSideRon(me, target, players, ronPoint, pot, honba) {
+        const after = clonePlayers(players);
+        const honbaBonus = honba * 300;
+
+        const candidates = after.filter(p => p.seat !== me.seat && p.seat !== target.seat);
+        candidates.sort((a, b) => a.score - b.score);
+        const loserSeat = candidates[0].seat;
+
+        after[me.seat].score   += ronPoint + honbaBonus + pot;
+        after[loserSeat].score -= ronPoint + honbaBonus;
+        return after;
+    }
+
+    function simulateTsumoWithHand(me, players, handInfo, pot, honba) {
+        const after = clonePlayers(players);
+        const honbaPlus = honba * 300;
+        const honbaMinus = honba * 100;
+        const parentSeat = players.find(p => p.isParent).seat;
+
+        if (me.isParent) {
+            const payEach = handInfo.tsumoEach;
+            for (let i = 0; i < after.length; i++) {
+                if (i === me.seat) {
+                    after[i].score += payEach * 3 + honbaPlus + pot;
+                } else {
+                    after[i].score -= payEach + honbaMinus;
+                }
+            }
+        } else {
+            const fromParent = handInfo.tsumoFromParent;
+            const fromChild  = handInfo.tsumoFromChild;
+            for (let i = 0; i < after.length; i++) {
+                if (i === me.seat) {
+                    after[i].score += fromParent + fromChild * 2 + honbaPlus + pot;
+                } else if (i === parentSeat) {
+                    after[i].score -= fromParent + honbaMinus;
+                } else {
+                    after[i].score -= fromChild + honbaMinus;
+                }
+            }
+        }
+        return after;
+    }
+
+    function getTsumoDesc(handInfo, isParent) {
+        if (isParent) {
+            return `親ツモ：${handInfo.tsumoEach}オール`;
+        } else {
+            return `子ツモ：親 ${handInfo.tsumoFromParent}点・子 ${handInfo.tsumoFromChild}点`;
+        }
+    }
+
+    function calcTotalDiff(afterPlayers, mySeat, targetSeat, uma, okaPt, returnPoint, totalsBefore) {
+        const sorted = [...afterPlayers].sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return a.seat - b.seat;
+        });
+
+        const rankBySeat = {};
+        sorted.forEach((p, idx) => {
+            rankBySeat[p.seat] = idx;
+        });
+
+        const thisHanPtBySeat = {};
+        for (const p of afterPlayers) {
+            const rank = rankBySeat[p.seat];
+            const base = (p.score - returnPoint) / 1000;
+            const umaVal = uma[rank] || 0;
+            const okaVal = (rank === 0 ? okaPt : 0);
+            thisHanPtBySeat[p.seat] = base + umaVal + okaVal;
+        }
+
+        const totalAfter = {};
+        for (let seat = 0; seat < 4; seat++) {
+            const before = totalsBefore[seat] || 0;
+            totalAfter[seat] = before + (thisHanPtBySeat[seat] || 0);
+        }
+
+        return {
+            myAfter: totalAfter[mySeat],
+            targetAfter: totalAfter[targetSeat],
+            diffAfter: totalAfter[mySeat] - totalAfter[targetSeat],
+            myThisHan: thisHanPtBySeat[mySeat],
+            targetThisHan: thisHanPtBySeat[targetSeat]
+        };
+    }
+
+    function calcTotalsForAll(afterPlayers, uma, okaPt, returnPoint, totalsBefore) {
+        const sorted = [...afterPlayers].sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return a.seat - b.seat;
+        });
+
+        const rankBySeat = {};
+        sorted.forEach((p, idx) => {
+            rankBySeat[p.seat] = idx;
+        });
+
+        const thisHanPtBySeat = {};
+        const totalAfter = {};
+        for (const p of afterPlayers) {
+            const rank = rankBySeat[p.seat];
+            const base = (p.score - returnPoint) / 1000;
+            const umaVal = uma[rank] || 0;
+            const okaVal = (rank === 0 ? okaPt : 0);
+            thisHanPtBySeat[p.seat] = base + umaVal + okaVal;
+        }
+        for (let seat = 0; seat < 4; seat++) {
+            const before = totalsBefore[seat] || 0;
+            totalAfter[seat] = before + (thisHanPtBySeat[seat] || 0);
+        }
+        return { thisHanPtBySeat, totalAfter };
+    }
+
+    function makePtText(ptInfo, targetName) {
+        const myAfter   = ptInfo.myAfter.toFixed(1);
+        const tgAfter   = ptInfo.targetAfter.toFixed(1);
+        const diffAfter = ptInfo.diffAfter.toFixed(1);
+        const myThis    = ptInfo.myThisHan.toFixed(1);
+        const tgThis    = ptInfo.targetThisHan.toFixed(1);
+
+        let status = "同点";
+        if (ptInfo.diffAfter > 0) status = "リード";
+        else if (ptInfo.diffAfter < 0) status = "ビハインド";
+
+        return `この半荘の収支：自分 ${myThis}pt / ${targetName} ${tgThis}pt。　終了時トータル：自分 ${myAfter}pt / ${targetName} ${tgAfter}pt（差 ${diffAfter}pt・${status}）。`;
+    }
+
+    function updateStatusSummary() {
+        const scores = [];
+        const totals = [];
+        for (let i = 0; i < 4; i++) {
+            scores[i] = parseInt(document.getElementById('score' + i).value, 10) || 0;
+            totals[i] = parseFloat(document.getElementById('total' + i).value) || 0;
+        }
+        const mySeat = getMySeat();
+
+        const scoreRank = rankArray(scores);
+        const totalRank = rankArray(totals);
+
+        const myScoreRank = scoreRank.rankBySeat[mySeat];
+        const myTotalRank = totalRank.rankBySeat[mySeat];
+
+        const scoreDiff = scores[scoreRank.topIdx] - scores[mySeat];
+        const totalDiff = totals[totalRank.topIdx] - totals[mySeat];
+
+        let scoreClass = "status-ok";
+        if (myScoreRank === 1) scoreClass = "status-ok";
+        else if (myScoreRank === 2) scoreClass = "status-warn";
+        else scoreClass = "status-bad";
+
+        let totalClass = "status-ok";
+        if (myTotalRank === 1) totalClass = "status-ok";
+        else if (myTotalRank === 2) totalClass = "status-warn";
+        else totalClass = "status-bad";
+
+        const el = document.getElementById('statusSummary');
+        if (!el) return;
+
+        const scoreLine = (myScoreRank === 1)
+            ? `点棒順位：1位（2位との差 ${Math.abs(scoreDiff)}点）`
+            : `点棒順位：${myScoreRank}位（トップと ${scoreDiff < 0 ? "-" : "+"}${Math.abs(scoreDiff)}点）`;
+
+        const totalLine = (myTotalRank === 1)
+            ? `トータル順位：1位（2位との差 ${Math.abs(totalDiff).toFixed(1)}pt）`
+            : `トータル順位：${myTotalRank}位（トップと ${totalDiff < 0 ? "-" : "+"}${Math.abs(totalDiff).toFixed(1)}pt）`;
+
+        el.innerHTML =
+            `<div class="status-line ${scoreClass}">${scoreLine}</div>` +
+            `<div class="status-line ${totalClass}">${totalLine}</div>`;
+    }
+
+    function updateSimWinType() {
+        const winType = document.getElementById('simWinType').value;
+        const row = document.getElementById('simRonTargetRow');
+        if (winType === 'tsumo') {
+            row.style.display = 'none';
+        } else {
+            row.style.display = 'flex';
+        }
+    }
+
+    function simulateCustomHand() {
+        const han = parseInt(document.getElementById('simHan').value, 10) || 0;
+        const fu  = parseInt(document.getElementById('simFu').value, 10) || 0;
+        const winType = document.getElementById('simWinType').value;
+        const targetSeatForRon = parseInt(document.getElementById('simRonTarget').value, 10) || 0;
+
+        const kyotakuBase = parseInt(document.getElementById('kyotaku').value, 10) || 0;
+        const honba   = parseInt(document.getElementById('honba').value, 10) || 0;
+        const riichi  = document.getElementById('riichiFlag').checked;
+
+        const returnPoint = parseInt(document.getElementById('returnPoint').value, 10) || 30000;
+        const okaPt = parseFloat(document.getElementById('oka').value) || 0;
+        const uma = [];
+        for (let i = 0; i < 4; i++) {
+            uma[i] = parseFloat(document.getElementById('uma' + i).value) || 0;
+        }
+
+        const totalsBefore = [];
+        const scoresBefore = [];
+        for (let i = 0; i < 4; i++) {
+            scoresBefore[i] = parseInt(document.getElementById('score' + i).value, 10) || 0;
+            totalsBefore[i] = parseFloat(document.getElementById('total' + i).value) || 0;
+        }
+
+        let players = [];
+        const mySeat = getMySeat();
+        for (let i = 0; i < 4; i++) {
+            players.push({
+                seat: i,
+                name: winds[i],
+                score: scoresBefore[i],
+                isParent: (i === 0)
+            });
+        }
+
+        let kyotaku = kyotakuBase;
+        if (riichi) {
+            players[mySeat].score -= 1000;
+            kyotaku += 1;
+        }
+        const pot = kyotaku * 1000;
+
+        const me = players[mySeat];
+        const handInfo = scoreHand(han, fu, me.isParent);
+
+        let afterPlayers = null;
+        if (winType === 'ron') {
+            const target = players[targetSeatForRon];
+            afterPlayers = simulateDirectRon(me, target, players, handInfo.ron, pot, honba);
+        } else {
+            afterPlayers = simulateTsumoWithHand(me, players, handInfo, pot, honba);
+        }
+
+        const { thisHanPtBySeat, totalAfter } =
+            calcTotalsForAll(afterPlayers, uma, okaPt, returnPoint, totalsBefore);
+
+        let html = "";
+
+        html += `<div><strong>【この手の点数】</strong><br>`;
+        if (winType === 'ron') {
+            html += `ロン ${handInfo.label} → ${handInfo.ron}点`;
+        } else {
+            if (me.isParent) {
+                html += `親ツモ ${handInfo.label} → ${handInfo.tsumoEach}オール`;
+            } else {
+                html += `子ツモ ${handInfo.label} → 親 ${handInfo.tsumoFromParent}点・子 ${handInfo.tsumoFromChild}点`;
+            }
+        }
+        html += `</div><br>`;
+
+        html += `<div><strong>【この半荘のポイント収支】</strong><br>`;
+        for (let i = 0; i < 4; i++) {
+            const sign = thisHanPtBySeat[i] >= 0 ? "+" : "";
+            html += `${winds[i]}：${sign}${thisHanPtBySeat[i].toFixed(1)}pt`;
+            if (i === mySeat) html += "（自分）";
+            html += "<br>";
+        }
+        html += `</div><br>`;
+
+        html += `<div><strong>【終了時トータルポイント】</strong><br>`;
+        for (let i = 0; i < 4; i++) {
+            const signB = totalsBefore[i] >= 0 ? "+" : "";
+            const signA = totalAfter[i] >= 0 ? "+" : "";
+            html += `${winds[i]}：開始 ${signB}${totalsBefore[i].toFixed(1)}pt → 終了 ${signA}${totalAfter[i].toFixed(1)}pt`;
+            if (i === mySeat) html += "（自分）";
+            html += "<br>";
+        }
+        html += `</div>`;
+
+        const custom = document.getElementById('customResult');
+        custom.style.display = "block";
+        custom.innerHTML = html;
+    }
+
+    window.addEventListener('load', () => {
+        updateStatusSummary();
+        updateSimWinType();
+    });
+</script>
+</body>
+</html>
