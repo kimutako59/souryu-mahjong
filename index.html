@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🀄 麻雀 点差＆逆転条件＋トータルポイント計算</title>
+    <title>🀄 逆転条件シミュレーター　点差＆トータル条件計算機</title>
 
     <style>
         body {
@@ -258,15 +258,15 @@
             font-size: 0.9rem;
         }
         .condition-label {
-            color: #7f8c8d;
+            color: #555;
         }
         .condition-main-label {
             font-weight: bold;
             color: #2c3e50;
             font-size: 0.95rem;
-            padding: 2px 10px;
+            padding: 2px 8px;
+            background: #eef4ff;
             border-radius: 999px;
-            background: #eaf2ff;
         }
         .condition-label-strong {
             font-weight: bold;
@@ -330,12 +330,34 @@
             border: 1px solid #dde4f0;
         }
 
+        .view-mode-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 15px 10px;
+            font-size: 0.85rem;
+            color: #34495e;
+        }
+        .view-mode-row label {
+            white-space: nowrap;
+        }
+        .view-mode-row select {
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            border: 1px solid #bdc3c7;
+        }
+
         @media (max-width: 600px) {
             .two-col .input-row {
                 flex: 1 1 100%;
             }
             .btn-row {
                 flex-direction: column;
+            }
+            .view-mode-row {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
@@ -344,7 +366,7 @@
 <body>
 <div class="container">
     <header>
-        <h1>🀄 麻雀 点差＆逆転条件＋トータルポイント計算</h1>
+        <h1>🀄 逆転条件シミュレーター　点差＆トータル条件計算機</h1>
     </header>
 
     <!-- 場況 -->
@@ -578,6 +600,15 @@
     <!-- 状況サマリー -->
     <div id="statusSummary" class="status-summary">
         （現在の順位サマリーはここに表示されます）
+    </div>
+
+    <!-- 表示モード切り替え -->
+    <div class="view-mode-row">
+        <label for="viewMode">表示モード：</label>
+        <select id="viewMode">
+            <option value="attack">打倒条件（まくる側）</option>
+            <option value="defense">ラス回避・順位落ち（やられる側）</option>
+        </select>
     </div>
 
     <!-- ボタン行 -->
@@ -885,7 +916,6 @@
         const ptDiff = totalsBefore[target.seat] - totalsBefore[mySeat];
         const ptGapAbs = Math.abs(ptDiff);
 
-        // トータルトップのとき：守備系＋状況別
         if (myTotalRank === 1) {
             if (myScoreRank >= 3 && difficulty === "hard") {
                 return "点棒では下位ですが、トータルではトップです。倍満級の手を無理に狙うより、放銃を避けて順位を1つでも上げられれば十分な局面です。安全寄りの押し引きで、致命傷だけは避ける意識を持ちましょう。";
@@ -899,14 +929,12 @@
             if (difficulty === "easy") {
                 return "総合トップの状態で比較的軽い条件でさらに差を広げられますが、大きな放銃でトップ転落しないように注意が必要です。好配牌や好形リーチの局では積極的に加点し、それ以外では押し過ぎないメリハリをつけると良いでしょう。";
             }
-            // neutral
             if (myScoreRank === 1) {
                 return "点棒・トータルともにトップで、特別な無理をする必要はありません。他家の無理なリーチや仕掛けにはつきあわず、手がまとまった局だけきちんとアガって差を維持・拡大するイメージで打つのが安全です。";
             }
             return "総合トップだが点棒ではビハインドの相手です。あくまで『無理のない範囲の攻め』で、リーチや押しを選択する局と、オリる局をはっきり分けていくと、リスクを抑えながら着実に差を広げられます。";
         }
 
-        // トータルビハインド側のパターン
         if (difficulty === "easy") {
             if (ptDiff > 0 && targetTotalRank === 1 && ptGapAbs > 50) {
                 return "この相手が総合トップで、かつ大きめのポイント差がありますが、比較的軽い手で逆転が狙えます。オーラス付近なら、多少リスクを取ってでもリーチで一気にトップを奪いにいく価値のある局面です。";
@@ -926,7 +954,6 @@
             return "点数・ポイントの両方でこの相手を逆転する条件はかなり重く、現実的には『まくれたらラッキー』レベルです。必要打点を意識しつつも、無理に全部を追いかけず、他家との点差やトータル状況を見てターゲットを柔軟に切り替えるのが良いでしょう。";
         }
 
-        // neutral（中くらいの条件）
         if (myScoreRank === 1 && myTotalRank >= 3) {
             return "この半荘自体はトップ目ですが、トータルでは下位に沈んでいます。現実的な打点でこの相手をまくれるなら、オーラスでトップを守りつつも、ポイント差を詰められる攻めどころではしっかり押していきたい場面です。";
         }
@@ -965,10 +992,6 @@
             totalsBefore[i] = parseFloat(document.getElementById('total' + i).value) || 0;
         }
 
-        const pot = kyotaku * 1000;
-
-        const me = players[myIndex];
-
         const returnPoint = parseInt(document.getElementById('returnPoint').value, 10) || 30000;
         const okaPt = parseFloat(document.getElementById('oka').value) || 0;
         const uma = [];
@@ -981,6 +1004,22 @@
         const scoreRankBySeat = scoreRankInfo.rankBySeat;
         const totalRankBySeat = totalRankInfo.rankBySeat;
 
+        const myScoreRank0 = scoreRankBySeat[myIndex];
+        const myTotalRank0 = totalRankBySeat[myIndex];
+
+        const viewModeEl = document.getElementById('viewMode');
+        const viewMode = viewModeEl ? viewModeEl.value : 'attack';
+
+        const pot = kyotaku * 1000;
+        const me = players[myIndex];
+
+        if (viewMode === 'defense') {
+            calculateDefense(players, scoresBefore, totalsBefore, me, pot, honba, uma, okaPt, returnPoint, myTotalRank0);
+            updateStatusSummary();
+            return;
+        }
+
+        // --- ここから攻撃モード（従来の打倒条件） ---
         let scoreTargets = players.filter(p => p.seat !== myIndex && p.score >= me.score);
         scoreTargets.sort((a, b) => b.score - a.score);
 
@@ -998,7 +1037,7 @@
 
         const processedSeats = new Set();
 
-        // 点棒でも負けている相手
+        // 点棒でも負けている相手（打倒ターゲット）
         scoreTargets.forEach(target => {
             processedSeats.add(target.seat);
             const diff = target.score - me.score;
@@ -1453,6 +1492,38 @@
         return html;
     }
 
+    function makeDefenseRow(mainLabel, res) {
+        if (!res) {
+            return `
+                <div class="cond-block">
+                    <div class="condition-row">
+                        <span class="condition-main-label">${mainLabel}</span>
+                        <span class="condition-val" style="color:#27ae60;">このパターンでは順位は落ちません</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        let sd = res.score >= 32000
+            ? "役満級"
+            : (res.score > 0 ? res.score + "点" : "条件なし");
+
+        const rankText = `トータル順位：${res.beforeRank}位 → ${res.afterRank}位`;
+
+        return `
+            <div class="cond-block">
+                <div class="condition-row">
+                    <span class="condition-main-label">${mainLabel}</span>
+                    <span class="condition-val">${sd}</span>
+                </div>
+                <div class="condition-detail">
+                    ${rankText}<br>
+                    ${res.text}
+                </div>
+            </div>
+        `;
+    }
+
     function clonePlayers(players) {
         return players.map(p => ({ ...p }));
     }
@@ -1542,6 +1613,7 @@
             const before = totalsBefore[seat] || 0;
             totalAfter[seat] = before + (thisHanPtBySeat[seat] || 0);
         }
+
         return {
             myAfter: totalAfter[mySeat],
             targetAfter: totalAfter[targetSeat],
@@ -1683,7 +1755,7 @@
             });
         }
 
-        let kyotaku = kyotakuBase;
+        const kyotaku = kyotakuBase;
         const pot = kyotaku * 1000;
 
         const me = players[mySeat];
@@ -1736,6 +1808,174 @@
         const custom = document.getElementById('customResult');
         custom.style.display = "block";
         custom.innerHTML = html;
+    }
+
+    // --- 防御モード用：トータル順位が落ちる条件を計算 ---
+    function findTotalDropDirect(defender, attacker, players, pot, honba, uma, okaPt, returnPoint, totalsBefore, myTotalRankBefore) {
+        const sortedCand = [...candidateHands].sort((a, b) => {
+            const pa = scoreHand(a.han, a.fu, attacker.isParent).ron;
+            const pb = scoreHand(b.han, b.fu, attacker.isParent).ron;
+            return pa - pb;
+        });
+
+        for (const cand of sortedCand) {
+            const handInfo = scoreHand(cand.han, cand.fu, attacker.isParent);
+            const afterPlayers = simulateDirectRon(attacker, defender, players, handInfo.ron, pot, honba);
+            const { totalAfter } = calcTotalsForAll(afterPlayers, uma, okaPt, returnPoint, totalsBefore);
+            const totalArr = [totalAfter[0], totalAfter[1], totalAfter[2], totalAfter[3]];
+            const totalRankAfter = rankArray(totalArr).rankBySeat[defender.seat];
+
+            if (totalRankAfter > myTotalRankBefore) {
+                return {
+                    score: handInfo.ron,
+                    beforeRank: myTotalRankBefore,
+                    afterRank: totalRankAfter,
+                    text: `${attacker.name}に ${handInfo.label}（ロン ${handInfo.ron}点）をアガられると、トータル順位が${myTotalRankBefore}位から${totalRankAfter}位に落ちます。`
+                };
+            }
+        }
+        return null;
+    }
+
+    function findTotalDropTsumo(defender, attacker, players, pot, honba, uma, okaPt, returnPoint, totalsBefore, myTotalRankBefore) {
+        const sortedCand = [...candidateHands].sort((a, b) => {
+            const pa = scoreHand(a.han, a.fu, attacker.isParent).ron;
+            const pb = scoreHand(b.han, b.fu, attacker.isParent).ron;
+            return pa - pb;
+        });
+
+        for (const cand of sortedCand) {
+            const handInfo = scoreHand(cand.han, cand.fu, attacker.isParent);
+            const afterPlayers = simulateTsumoWithHand(attacker, players, handInfo, pot, honba);
+            const { totalAfter } = calcTotalsForAll(afterPlayers, uma, okaPt, returnPoint, totalsBefore);
+            const totalArr = [totalAfter[0], totalAfter[1], totalAfter[2], totalAfter[3]];
+            const totalRankAfter = rankArray(totalArr).rankBySeat[defender.seat];
+
+            if (totalRankAfter > myTotalRankBefore) {
+                return {
+                    score: handInfo.ron,
+                    beforeRank: myTotalRankBefore,
+                    afterRank: totalRankAfter,
+                    text: `${attacker.name}に ${handInfo.label}（${getTsumoDesc(handInfo, attacker.isParent)}）をツモられると、トータル順位が${myTotalRankBefore}位から${totalRankAfter}位に落ちます。`
+                };
+            }
+        }
+        return null;
+    }
+
+    function findTotalDropSide(defender, attacker, players, pot, honba, uma, okaPt, returnPoint, totalsBefore, myTotalRankBefore) {
+        const sortedCand = [...candidateHands].sort((a, b) => {
+            const pa = scoreHand(a.han, a.fu, attacker.isParent).ron;
+            const pb = scoreHand(b.han, b.fu, attacker.isParent).ron;
+            return pa - pb;
+        });
+
+        for (const cand of sortedCand) {
+            const handInfo = scoreHand(cand.han, cand.fu, attacker.isParent);
+            const afterPlayers = simulateSideRon(attacker, defender, players, handInfo.ron, pot, honba);
+            const { totalAfter } = calcTotalsForAll(afterPlayers, uma, okaPt, returnPoint, totalsBefore);
+            const totalArr = [totalAfter[0], totalAfter[1], totalAfter[2], totalAfter[3]];
+            const totalRankAfter = rankArray(totalArr).rankBySeat[defender.seat];
+
+            if (totalRankAfter > myTotalRankBefore) {
+                return {
+                    score: handInfo.ron,
+                    beforeRank: myTotalRankBefore,
+                    afterRank: totalRankAfter,
+                    text: `${attacker.name}が他家から ${handInfo.label}（ロン ${handInfo.ron}点）でアガると、その点棒移動によりトータル順位が${myTotalRankBefore}位から${totalRankAfter}位に落ちます。`
+                };
+            }
+        }
+        return null;
+    }
+
+    function calculateDefense(players, scoresBefore, totalsBefore, me, pot, honba, uma, okaPt, returnPoint, myTotalRank0) {
+        const resultsDiv = document.getElementById('resultArea');
+        resultsDiv.innerHTML = "";
+
+        const mySeat = me.seat;
+
+        if (myTotalRank0 === 4) {
+            resultsDiv.innerHTML =
+                "<div style='text-align:center; padding:20px; font-weight:bold; color:#c0392b;'>" +
+                "現在トータルラスのため、これ以上順位が落ちることはありません。<br>次の半荘以降での巻き返しを意識しましょう。" +
+                "</div>";
+            return;
+        }
+
+        // 自分よりトータルが下の相手だけを「追い上げてくる脅威」として見る
+        const threats = players.filter(p => p.seat !== mySeat && totalsBefore[p.seat] <= totalsBefore[mySeat]);
+        threats.sort((a, b) => (totalsBefore[b.seat] - totalsBefore[a.seat])); // 近い相手から
+
+        if (threats.length === 0) {
+            resultsDiv.innerHTML =
+                "<div style='text-align:center; padding:20px; font-weight:bold; color:#27ae60;'>" +
+                "現在トータルで上位の相手しかおらず、この局でトータル順位が落ちる可能性はほとんどありません。" +
+                "</div>";
+            return;
+        }
+
+        let anyCard = false;
+
+        threats.forEach(attacker => {
+            const beforeDiff = totalsBefore[mySeat] - totalsBefore[attacker.seat];
+
+            const directRes = findTotalDropDirect(me, attacker, players, pot, honba, uma, okaPt, returnPoint, totalsBefore, myTotalRank0);
+            const tsumoRes  = findTotalDropTsumo(me, attacker, players, pot, honba, uma, okaPt, returnPoint, totalsBefore, myTotalRank0);
+            const sideRes   = findTotalDropSide(me, attacker, players, pot, honba, uma, okaPt, returnPoint, totalsBefore, myTotalRank0);
+
+            if (!directRes && !tsumoRes && !sideRes) {
+                return; // この相手では順位落ちは発生しない
+            }
+
+            anyCard = true;
+
+            const difficulty = classifyDifficulty([directRes, tsumoRes, sideRes]);
+
+            let cardClass = "target-card";
+            let highlightIcon = "";
+            let collapsed = false;
+
+            if (difficulty === "easy") {
+                cardClass += " target-card-easy";
+                highlightIcon = '<span class="chance-badge">要警戒！</span>';
+            } else if (difficulty === "hard") {
+                cardClass += " target-card-hard";
+                collapsed = true;
+            }
+
+            const cardId = `cardBody_${cardCounter++}`;
+            const bodyStyle = collapsed ? " style='display:none;'" : "";
+            const toggleLabel = collapsed ? "詳細を表示" : "詳細を隠す";
+
+            const leadText = beforeDiff >= 0
+                ? `現在のトータル差：自分が ${beforeDiff.toFixed(1)}pt リード`
+                : `現在のトータル差：自分が ${Math.abs(beforeDiff).toFixed(1)}pt ビハインド`;
+
+            let html = `<div class="${cardClass}">`;
+            html += `<div class="target-header">
+                        <span>${highlightIcon}警戒対象: ${attacker.name}</span>
+                        <div class="target-header-right">
+                            <span>${leadText}</span>
+                            <button type="button" class="card-toggle-btn" onclick="toggleCardBody('${cardId}', this)">${toggleLabel}</button>
+                        </div>
+                     </div>`;
+            html += `<div id="${cardId}"${bodyStyle}>`;
+
+            html += makeDefenseRow("自分から直撃された場合", directRes);
+            html += makeDefenseRow("ツモられた場合", tsumoRes);
+            html += makeDefenseRow("脇から出あがりした場合", sideRes);
+
+            html += `</div></div>`;
+            resultsDiv.innerHTML += html;
+        });
+
+        if (!anyCard) {
+            resultsDiv.innerHTML =
+                "<div style='text-align:center; padding:20px; font-weight:bold; color:#27ae60;'>" +
+                "この局面では、いずれの相手にアガられてもトータル順位が落ちることはありません（安全圏です）。" +
+                "</div>";
+        }
     }
 
     window.addEventListener('load', () => {
