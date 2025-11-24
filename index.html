@@ -107,19 +107,13 @@
             width: 60px;
             font-weight: bold;
             text-align: center;
-            white-space: nowrap; /* 縦書き防止 */
+            white-space: nowrap;
         }
         .score-col {
             flex: 1;
         }
 
-        /* スコア入力（ボタン＋入力欄を縦配置） */
         .score-input {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .score-buttons {
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -127,9 +121,10 @@
         .score-buttons-row {
             display: flex;
             gap: 4px;
+            margin-bottom: 2px;
         }
-        .score-buttons button {
-            flex: 1;
+        .score-buttons-row button {
+            flex: 1 1 0;
             min-width: 0;
             padding: 4px 0;
             border: 1px solid #ccc;
@@ -138,7 +133,7 @@
             cursor: pointer;
             font-size: 0.7rem;
         }
-        .score-buttons button:hover {
+        .score-buttons-row button:hover {
             background: #d4e4ff;
         }
         .score-input input {
@@ -147,8 +142,8 @@
             border-radius: 4px;
             font-size: 0.95rem;
             text-align: right;
-            max-width: 110px;       /* 横幅を抑えてスマホでのはみ出し防止 */
-            align-self: flex-end;   /* 右寄せ */
+            max-width: 110px;
+            align-self: flex-end;
         }
 
         button.calc-btn {
@@ -250,10 +245,16 @@
             background: #d0d7dd;
         }
 
+        .cond-block {
+            padding-top: 6px;
+            margin-top: 6px;
+            border-top: 1px dashed #e0e4ea;
+        }
+
         .condition-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 2px;
+            margin-bottom: 3px;
             font-size: 0.9rem;
         }
         .condition-label {
@@ -262,6 +263,7 @@
         .condition-label-strong {
             font-weight: bold;
             color: #34495e;
+            font-size: 0.95rem;
         }
         .condition-val {
             font-weight: bold;
@@ -287,25 +289,6 @@
         }
         .two-col .input-row {
             flex: 1 1 48%;
-        }
-
-        .preset-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 4px;
-        }
-        .preset-btn {
-            flex: 1 1 48%;
-            padding: 6px 4px;
-            font-size: 0.75rem;
-            border-radius: 6px;
-            border: 1px solid #c5d0dd;
-            background: #f2f6ff;
-            cursor: pointer;
-        }
-        .preset-btn:hover {
-            background: #e0ebff;
         }
 
         .status-summary {
@@ -373,23 +356,9 @@
                 <span class="unit">本場</span>
             </div>
         </div>
-    </div>
-
-    <!-- プリセット -->
-    <div class="section">
-        <div class="section-title">
-            <div class="section-title-left">よく使う場況プリセット</div>
-        </div>
-        <div class="preset-row">
-            <button type="button" class="preset-btn" onclick="applyPreset('south_flat')">
-                オーラス・自分南家・平場（供託0・本場0）
-            </button>
-            <button type="button" class="preset-btn" onclick="applyPreset('lasthand_behind')">
-                オーラス・ラス目・供託3本・本場2本（自分北家）
-            </button>
-        </div>
-        <div class="mini-note">
-            ※ プリセットは場況（親・自分の席・供託・本場）だけを簡単にセットします。点数やポイントはそのまま／あとで調整してください。
+        <div class="input-row">
+            <label>自分はすでにリーチしている（1000点供託）</label>
+            <input type="checkbox" id="riichiFlag">
         </div>
     </div>
 
@@ -406,17 +375,15 @@
             <div class="name-col">東家</div>
             <div class="score-col">
                 <div class="score-input">
-                    <div class="score-buttons">
-                        <div class="score-buttons-row">
-                            <button type="button" onclick="adjustScore(0,-100)">-100</button>
-                            <button type="button" onclick="adjustScore(0,-1000)">-1000</button>
-                            <button type="button" onclick="adjustScore(0,-10000)">-10000</button>
-                        </div>
-                        <div class="score-buttons-row">
-                            <button type="button" onclick="adjustScore(0,100)">+100</button>
-                            <button type="button" onclick="adjustScore(0,1000)">+1000</button>
-                            <button type="button" onclick="adjustScore(0,10000)">+10000</button>
-                        </div>
+                    <div class="score-buttons-row">
+                        <button type="button" onclick="adjustScore(0,-100)">-100</button>
+                        <button type="button" onclick="adjustScore(0,-1000)">-1000</button>
+                        <button type="button" onclick="adjustScore(0,-10000)">-10000</button>
+                    </div>
+                    <div class="score-buttons-row">
+                        <button type="button" onclick="adjustScore(0,100)">+100</button>
+                        <button type="button" onclick="adjustScore(0,1000)">+1000</button>
+                        <button type="button" onclick="adjustScore(0,10000)">+10000</button>
                     </div>
                     <input type="number" id="score0" value="25000" step="100">
                 </div>
@@ -430,17 +397,15 @@
             <div class="name-col">南家</div>
             <div class="score-col">
                 <div class="score-input">
-                    <div class="score-buttons">
-                        <div class="score-buttons-row">
-                            <button type="button" onclick="adjustScore(1,-100)">-100</button>
-                            <button type="button" onclick="adjustScore(1,-1000)">-1000</button>
-                            <button type="button" onclick="adjustScore(1,-10000)">-10000</button>
-                        </div>
-                        <div class="score-buttons-row">
-                            <button type="button" onclick="adjustScore(1,100)">+100</button>
-                            <button type="button" onclick="adjustScore(1,1000)">+1000</button>
-                            <button type="button" onclick="adjustScore(1,10000)">+10000</button>
-                        </div>
+                    <div class="score-buttons-row">
+                        <button type="button" onclick="adjustScore(1,-100)">-100</button>
+                        <button type="button" onclick="adjustScore(1,-1000)">-1000</button>
+                        <button type="button" onclick="adjustScore(1,-10000)">-10000</button>
+                    </div>
+                    <div class="score-buttons-row">
+                        <button type="button" onclick="adjustScore(1,100)">+100</button>
+                        <button type="button" onclick="adjustScore(1,1000)">+1000</button>
+                        <button type="button" onclick="adjustScore(1,10000)">+10000</button>
                     </div>
                     <input type="number" id="score1" value="25000" step="100">
                 </div>
@@ -454,17 +419,15 @@
             <div class="name-col">西家</div>
             <div class="score-col">
                 <div class="score-input">
-                    <div class="score-buttons">
-                        <div class="score-buttons-row">
-                            <button type="button" onclick="adjustScore(2,-100)">-100</button>
-                            <button type="button" onclick="adjustScore(2,-1000)">-1000</button>
-                            <button type="button" onclick="adjustScore(2,-10000)">-10000</button>
-                        </div>
-                        <div class="score-buttons-row">
-                            <button type="button" onclick="adjustScore(2,100)">+100</button>
-                            <button type="button" onclick="adjustScore(2,1000)">+1000</button>
-                            <button type="button" onclick="adjustScore(2,10000)">+10000</button>
-                        </div>
+                    <div class="score-buttons-row">
+                        <button type="button" onclick="adjustScore(2,-100)">-100</button>
+                        <button type="button" onclick="adjustScore(2,-1000)">-1000</button>
+                        <button type="button" onclick="adjustScore(2,-10000)">-10000</button>
+                    </div>
+                    <div class="score-buttons-row">
+                        <button type="button" onclick="adjustScore(2,100)">+100</button>
+                        <button type="button" onclick="adjustScore(2,1000)">+1000</button>
+                        <button type="button" onclick="adjustScore(2,10000)">+10000</button>
                     </div>
                     <input type="number" id="score2" value="25000" step="100">
                 </div>
@@ -478,17 +441,15 @@
             <div class="name-col">北家</div>
             <div class="score-col">
                 <div class="score-input">
-                    <div class="score-buttons">
-                        <div class="score-buttons-row">
-                            <button type="button" onclick="adjustScore(3,-100)">-100</button>
-                            <button type="button" onclick="adjustScore(3,-1000)">-1000</button>
-                            <button type="button" onclick="adjustScore(3,-10000)">-10000</button>
-                        </div>
-                        <div class="score-buttons-row">
-                            <button type="button" onclick="adjustScore(3,100)">+100</button>
-                            <button type="button" onclick="adjustScore(3,1000)">+1000</button>
-                            <button type="button" onclick="adjustScore(3,10000)">+10000</button>
-                        </div>
+                    <div class="score-buttons-row">
+                        <button type="button" onclick="adjustScore(3,-100)">-100</button>
+                        <button type="button" onclick="adjustScore(3,-1000)">-1000</button>
+                        <button type="button" onclick="adjustScore(3,-10000)">-10000</button>
+                    </div>
+                    <div class="score-buttons-row">
+                        <button type="button" onclick="adjustScore(3,100)">+100</button>
+                        <button type="button" onclick="adjustScore(3,1000)">+1000</button>
+                        <button type="button" onclick="adjustScore(3,10000)">+10000</button>
                     </div>
                     <input type="number" id="score3" value="25000" step="100">
                 </div>
@@ -566,45 +527,48 @@
         </div>
     </div>
 
-    <!-- 特定の手シミュレーション -->
+    <!-- 特定の手シミュレーション（折りたたみ） -->
     <div class="section">
         <div class="section-title">
             <div class="section-title-left">特定の手でのシミュレーション</div>
+            <button id="simToggleBtn" class="card-toggle-btn" type="button" onclick="toggleSimSection()">設定を表示</button>
         </div>
-        <div class="two-col">
-            <div class="input-row">
-                <label>翻数</label>
-                <input type="number" id="simHan" value="3" min="1" max="13">
-                <span class="unit">翻</span>
+        <div id="simSectionBody" style="display:none;">
+            <div class="two-col">
+                <div class="input-row">
+                    <label>翻数</label>
+                    <input type="number" id="simHan" value="3" min="1" max="13">
+                    <span class="unit">翻</span>
+                </div>
+                <div class="input-row">
+                    <label>符</label>
+                    <input type="number" id="simFu" value="40" step="10">
+                    <span class="unit">符</span>
+                </div>
             </div>
             <div class="input-row">
-                <label>符</label>
-                <input type="number" id="simFu" value="40" step="10">
-                <span class="unit">符</span>
+                <label>アガリ形</label>
+                <select id="simWinType" onchange="updateSimWinType()">
+                    <option value="ron">ロン</option>
+                    <option value="tsumo">ツモ</option>
+                </select>
             </div>
+            <div class="input-row" id="simRonTargetRow">
+                <label>ロン相手（仮定）</label>
+                <select id="simRonTarget">
+                    <option value="0">東家</option>
+                    <option value="1">南家</option>
+                    <option value="2">西家</option>
+                    <option value="3">北家</option>
+                </select>
+            </div>
+            <div class="mini-note">
+                ※ 現在の場況・持ち点・トータルポイント・ウマオカを前提に、指定した翻・符・アガリ形で局が終わった場合の収支とトータルを計算します。<br>
+                　（自分の席は上のラジオボタンの設定を使います）
+            </div>
+            <button class="sub-btn" type="button" onclick="simulateCustomHand()">この手でどうなるか計算</button>
+            <div id="customResult" style="display:none;"></div>
         </div>
-        <div class="input-row">
-            <label>アガリ形</label>
-            <select id="simWinType" onchange="updateSimWinType()">
-                <option value="ron">ロン</option>
-                <option value="tsumo">ツモ</option>
-            </select>
-        </div>
-        <div class="input-row" id="simRonTargetRow">
-            <label>ロン相手（仮定）</label>
-            <select id="simRonTarget">
-                <option value="0">東家</option>
-                <option value="1">南家</option>
-                <option value="2">西家</option>
-                <option value="3">北家</option>
-            </select>
-        </div>
-        <div class="mini-note">
-            ※ 現在の場況・持ち点・トータルポイント・ウマオカを前提に、指定した翻・符・アガリ形で局が終わった場合の収支とトータルを計算します。<br>
-            　（自分の席は上のラジオボタンの設定を使います）
-        </div>
-        <button class="sub-btn" type="button" onclick="simulateCustomHand()">この手でどうなるか計算</button>
-        <div id="customResult" style="display:none;"></div>
     </div>
 
     <!-- 状況サマリー -->
@@ -628,27 +592,21 @@
 <script>
     const winds = ["東家", "南家", "西家", "北家"];
 
-    // 実戦でよく出る「符・翻」候補
     const candidateHands = [
-        // 1翻
         { han: 1, fu: 30 },
         { han: 1, fu: 40 },
-        // 2翻
         { han: 2, fu: 20 },
         { han: 2, fu: 25 },
         { han: 2, fu: 30 },
         { han: 2, fu: 40 },
         { han: 2, fu: 50 },
-        // 3翻
         { han: 3, fu: 25 },
         { han: 3, fu: 30 },
         { han: 3, fu: 40 },
         { han: 3, fu: 50 },
-        // 4翻
         { han: 4, fu: 30 },
         { han: 4, fu: 40 },
         { han: 4, fu: 50 },
-        // 5翻以上（代表）
         { han: 5, fu: 30 },
         { han: 6, fu: 30 },
         { han: 7, fu: 30 },
@@ -663,10 +621,8 @@
         return Math.ceil(x / 100) * 100;
     }
 
-    // 親の点数計算
     function scoreHandDealer(han, fu) {
         let limitName = null;
-
         if (han >= 13)       limitName = "役満";
         else if (han >= 11)  limitName = "三倍満";
         else if (han >= 8)   limitName = "倍満";
@@ -676,7 +632,6 @@
         }
 
         let ron, tsumoEach;
-
         if (limitName) {
             if      (limitName === "満貫")   { ron = 12000; tsumoEach = 4000; }
             else if (limitName === "跳満")   { ron = 18000; tsumoEach = 6000; }
@@ -696,10 +651,8 @@
         return { han, fu, ron, tsumoEach, label, limitName };
     }
 
-    // 子の点数計算
     function scoreHandChild(han, fu) {
         let limitName = null;
-
         if (han >= 13)       limitName = "役満";
         else if (han >= 11)  limitName = "三倍満";
         else if (han >= 8)   limitName = "倍満";
@@ -709,7 +662,6 @@
         }
 
         let ron, tsumoFromParent, tsumoFromChild;
-
         if (limitName) {
             if      (limitName === "満貫") {
                 ron = 8000;
@@ -780,7 +732,6 @@
         document.querySelectorAll('.player-row')[index].classList.add('active');
         updateStatusSummary();
     }
-    // 初期は南家
     highlightMe(1);
 
     function adjustScore(seat, delta) {
@@ -802,21 +753,16 @@
         }
     }
 
-    function applyPreset(type) {
-        if (type === 'south_flat') {
-            document.getElementById('kyotaku').value = 0;
-            document.getElementById('honba').value   = 0;
-            const radios = document.getElementsByName('mySeat');
-            for (let i = 0; i < radios.length; i++) radios[i].checked = (i === 1);
-            highlightMe(1);
-        } else if (type === 'lasthand_behind') {
-            document.getElementById('kyotaku').value = 3;
-            document.getElementById('honba').value   = 2;
-            const radios = document.getElementsByName('mySeat');
-            for (let i = 0; i < radios.length; i++) radios[i].checked = (i === 3);
-            highlightMe(3);
+    function toggleSimSection() {
+        const body = document.getElementById('simSectionBody');
+        const btn  = document.getElementById('simToggleBtn');
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            btn.textContent = '設定を隠す';
+        } else {
+            body.style.display = 'none';
+            btn.textContent = '設定を表示';
         }
-        updateStatusSummary();
     }
 
     function getMySeat() {
@@ -827,10 +773,9 @@
         return 0;
     }
 
-    // ランダム入力（点棒合計=100000−供託、ポイント合計=0）
     function randomFill() {
-        document.getElementById('kyotaku').value = Math.floor(Math.random() * 4); // 0〜3本
-        document.getElementById('honba').value   = Math.floor(Math.random() * 6); // 0〜5本
+        document.getElementById('kyotaku').value = Math.floor(Math.random() * 4);
+        document.getElementById('honba').value   = Math.floor(Math.random() * 6);
 
         const kyotaku = parseInt(document.getElementById('kyotaku').value, 10) || 0;
 
@@ -867,7 +812,6 @@
         }
         highlightMe(mySeat);
 
-        // トータルポイント（4人合計0pt）
         let raw = [0, 0, 0, 0];
         while (true) {
             raw[0] = Math.random() * 160 - 80;
@@ -893,11 +837,9 @@
         updateStatusSummary();
     }
 
-    // 難易度判定
     function classifyDifficulty(list) {
         let minScore = Infinity;
         let hasAny = false;
-
         for (const o of list) {
             if (!o) continue;
             if (o.keepLead) {
@@ -917,7 +859,6 @@
         return "neutral";
     }
 
-    // 共通：配列の順位付け（値大きい＝上）
     function rankArray(arr) {
         const order = arr.map((v, idx) => ({ v, idx }))
             .sort((a, b) => {
@@ -932,39 +873,64 @@
         return { rankBySeat, topIdx };
     }
 
-    // 戦略アドバイス生成
     function buildAdvice(difficulty, me, target, scores, totalsBefore, scoreRankBySeat, totalRankBySeat) {
         const mySeat = me.seat;
         const myScoreRank = scoreRankBySeat[mySeat];
         const myTotalRank = totalRankBySeat[mySeat];
         const targetTotalRank = totalRankBySeat[target.seat];
         const ptDiff = totalsBefore[target.seat] - totalsBefore[mySeat];
+        const ptGapAbs = Math.abs(ptDiff);
 
-        // トータルトップのときは守備寄りコメント多め
+        // トータルトップのとき：守備系＋状況別
         if (myTotalRank === 1) {
+            if (myScoreRank >= 3 && difficulty === "hard") {
+                return "点棒では下位ですが、トータルではトップです。倍満級の手を無理に狙うより、放銃を避けて順位を1つでも上げられれば十分な局面です。安全寄りの押し引きで、致命傷だけは避ける意識を持ちましょう。";
+            }
             if (difficulty === "hard") {
-                return "総合トップのため、この相手を無理にまくりに行く必要はありません。放銃を避けつつ、現在の順位とポイントをキープする打ち回しが無難です。";
-            } else if (difficulty === "easy") {
-                return "総合トップの状態で比較的軽い条件でさらに差を広げられますが、放銃してトップ転落しないように押し引きは慎重に。リスクを取り過ぎない範囲で加点を狙う場面です。";
+                return "総合トップのため、この相手を無理にまくりに行く必要はありません。倍満級の手が自然に見えたときだけ攻め、基本は放銃回避を優先してトップ・2着キープを狙うのが現実的です。";
+            }
+            if (difficulty === "easy" && ptGapAbs < 50) {
+                return "総合トップだが点差・ポイント差ともそこまで大きくありません。無理な仕掛けで振り込むと一気に形勢が変わるので、手が整った局だけしっかりリーチ・加点を狙い、それ以外はやや守備寄りに構えるとバランスが良いです。";
+            }
+            if (difficulty === "easy") {
+                return "総合トップの状態で比較的軽い条件でさらに差を広げられますが、大きな放銃でトップ転落しないように注意が必要です。好配牌や好形リーチの局では積極的に加点し、それ以外では押し過ぎないメリハリをつけると良いでしょう。";
+            }
+            // neutral
+            if (myScoreRank === 1) {
+                return "点棒・トータルともにトップで、特別な無理をする必要はありません。他家の無理なリーチや仕掛けにはつきあわず、手がまとまった局だけきちんとアガって差を維持・拡大するイメージで打つのが安全です。";
+            }
+            return "総合トップだが点棒ではビハインドの相手です。あくまで『無理のない範囲の攻め』で、リーチや押しを選択する局と、オリる局をはっきり分けていくと、リスクを抑えながら着実に差を広げられます。";
+        }
+
+        // トータルビハインド側のパターン
+        if (difficulty === "easy") {
+            if (ptDiff > 0 && targetTotalRank === 1 && ptGapAbs > 50) {
+                return "この相手が総合トップで、かつ大きめのポイント差がありますが、比較的軽い手で逆転が狙えます。オーラス付近なら、多少リスクを取ってでもリーチで一気にトップを奪いにいく価値のある局面です。";
+            } else if (ptDiff > 0 && targetTotalRank === 1) {
+                return "総合トップの相手とポイント差はそこまで大きくなく、現実的な打点で逆転可能です。手が整った局ではしっかりリーチを打ち、他家の動き次第ではダマ・ツモ狙いも視野に入れた柔軟な攻めが有効です。";
+            } else if (ptDiff > 0) {
+                return "この相手とはトータルでビハインドですが、手がまとまれば十分逆転が狙える条件です。ラス回避よりも順位アップ・トップ取りを優先する場面なら、多少押し気味に構えても良いタイミングと言えます。";
             } else {
-                return "総合トップですが、この相手に対しては中程度の打点があれば差を広げられます。局の進行や場況を見て、押し過ぎない範囲で前に出るかを判断すると良いでしょう。";
+                return "この相手にはすでにトータルでリードしていますが、さらに差を広げるチャンスです。ただし、他家にまくられるリスクもあるため、無理な押しで大きく深追いするより、良形リーチの局だけしっかり取り切るスタイルが安定します。";
             }
         }
 
-        // トータルビハインド側
-        if (difficulty === "easy") {
-            if (ptDiff > 0 && targetTotalRank === 1) {
-                return "この相手が総合トップで、比較的軽い手でポイント逆転が狙えます。オーラスや親番との兼ね合いを見つつ、チャンス手なら積極的にリーチ・加点を狙ってもよい場面です。";
-            } else if (ptDiff > 0) {
-                return "この相手とはポイント差がありますが、手がまとまれば十分逆転が狙える条件です。無理な押し引きではなく、手が入った局でしっかり取り切る意識が有効です。";
-            } else {
-                return "この相手にはすでにトータルでリードしていますが、さらに差を広げる好機です。他家との点差や親番も踏まえ、押し過ぎて不用意な放銃をしないようバランスよく攻めましょう。";
+        if (difficulty === "hard") {
+            if (ptDiff > 0 && ptGapAbs > 80) {
+                return "この相手をポイントでもまくるには、倍満級以上などかなり大きな手が必要です。局面によってはこの相手をターゲットから外し、より現実的に届く相手を狙ったり、ラス回避や2着キープを優先した方がトータルの成績は安定します。";
             }
-        } else if (difficulty === "hard") {
-            return "この相手を逆転するには倍満級以上などかなり大きな手が必要です。無理に逆転を狙うよりも、現実的な打点でのアガリや2着/3着キープ、放銃回避を優先した方が良い場面が多いでしょう。";
-        } else {
-            return "この相手とは中〜高打点があれば逆転が見込めます。局の残り巡目や自分の手の伸びを見ながら、押し引きのバランスを取りつつチャンス局で前に出ると良いでしょう。";
+            return "点数・ポイントの両方でこの相手を逆転する条件はかなり重く、現実的には『まくれたらラッキー』レベルです。必要打点を意識しつつも、無理に全部を追いかけず、他家との点差やトータル状況を見てターゲットを柔軟に切り替えるのが良いでしょう。";
         }
+
+        // neutral（中くらいの条件）
+        if (myScoreRank === 1 && myTotalRank >= 3) {
+            return "この半荘自体はトップ目ですが、トータルでは下位に沈んでいます。現実的な打点でこの相手をまくれるなら、オーラスでトップを守りつつも、ポイント差を詰められる攻めどころではしっかり押していきたい場面です。";
+        }
+        if (myScoreRank >= 3 && myTotalRank === 2) {
+            return "トータル2位で、この相手をまくるにはある程度の打点が必要です。無理に一局で決めにいくより、親番や場況の良いところでしっかり勝負をかけ、悪い巡目や場況では素直にオリるメリハリが重要です。";
+        }
+
+        return "この相手とは中〜高打点があれば逆転が見込めます。局の残り巡目や自分の手の伸び、他家の仕掛けやリーチ状況を見ながら、押し引きのバランスを取りつつ、チャンス局でしっかり前に出るとトータルでも良い結果に繋がりやすくなります。";
     }
 
     function calculate() {
@@ -972,11 +938,11 @@
 
         let kyotaku = parseInt(document.getElementById('kyotaku').value, 10) || 0;
         const honba   = parseInt(document.getElementById('honba').value, 10) || 0;
+        const riichi  = document.getElementById('riichiFlag').checked;
 
         const resultsDiv = document.getElementById('resultArea');
         resultsDiv.innerHTML = "";
 
-        // プレイヤー情報
         let players = [];
         let scoresBefore = [];
         let myIndex = getMySeat();
@@ -991,12 +957,15 @@
             });
         }
 
-        // トータルポイント（開始時）
         const totalsBefore = [];
         for (let i = 0; i < 4; i++) {
             totalsBefore[i] = parseFloat(document.getElementById('total' + i).value) || 0;
         }
 
+        if (riichi) {
+            players[myIndex].score -= 1000;
+            kyotaku += 1;
+        }
         const pot = kyotaku * 1000;
 
         const me = players[myIndex];
@@ -1008,17 +977,14 @@
             uma[i] = parseFloat(document.getElementById('uma' + i).value) || 0;
         }
 
-        // 順位情報（開始時）
         const scoreRankInfo = rankArray(scoresBefore);
         const totalRankInfo = rankArray(totalsBefore);
         const scoreRankBySeat = scoreRankInfo.rankBySeat;
         const totalRankBySeat = totalRankInfo.rankBySeat;
 
-        // 点棒で負けている相手
         let scoreTargets = players.filter(p => p.seat !== myIndex && p.score >= me.score);
         scoreTargets.sort((a, b) => b.score - a.score);
 
-        // トータルで負けている相手
         let pointTargets = players.filter(p => p.seat !== myIndex && totalsBefore[p.seat] >= totalsBefore[myIndex]);
         pointTargets.sort((a, b) => totalsBefore[b.seat] - totalsBefore[a.seat]);
 
@@ -1047,27 +1013,29 @@
             let otherScoreRes = null;
             let otherPointRes = null;
 
-            // 直撃（点数）
             const needDirectRaw = (diff - (2 * honba * 300) - pot) / 2;
             directScoreRes = findMinHandForRon(needDirectRaw, me.isParent);
             if (directScoreRes) {
                 const handInfo = scoreHand(directScoreRes.han, directScoreRes.fu, me.isParent);
                 const afterPlayers = simulateDirectRon(me, target, players, handInfo.ron, pot, honba);
                 const ptInfo = calcTotalDiff(afterPlayers, me.seat, target.seat, uma, okaPt, returnPoint, totalsBefore);
-                directScoreRes.ptText = makePtText(ptInfo, target.name);
+                const ptStr = makePtText(ptInfo, target.name);
+                directScoreRes.ptText = ptStr;
+                directScoreRes.diffLabel = ptInfo.diffLabel;
                 directScoreRes.text   = `${handInfo.label}（ロン ${handInfo.ron}点）`;
                 directScoreRes.score  = handInfo.ron;
             }
 
-            // 直撃（ポイント）
             if (alreadyLeadInPoint) {
+                const leadGap = totalsBefore[myIndex] - totalsBefore[target.seat];
                 directPointRes = {
                     score: 0,
                     text: "和了するだけでポイントリード維持（すでにトータルトップ）",
                     ptText: "",
                     han: 0,
                     fu: 0,
-                    keepLead: true
+                    keepLead: true,
+                    diffLabel: `差 ${leadGap.toFixed(1)}pt・リード維持`
                 };
             } else {
                 directPointRes = findMinHandForRonPointReverse(
@@ -1076,26 +1044,28 @@
                 );
             }
 
-            // ツモ（点数）
             tsumoScoreRes = findTsumoCondition(me, target, players, pot, honba);
             if (tsumoScoreRes) {
                 const handInfo = scoreHand(tsumoScoreRes.han, tsumoScoreRes.fu, me.isParent);
                 const afterPlayers = simulateTsumoWithHand(me, players, handInfo, pot, honba);
                 const ptInfo = calcTotalDiff(afterPlayers, me.seat, target.seat, uma, okaPt, returnPoint, totalsBefore);
-                tsumoScoreRes.ptText = makePtText(ptInfo, target.name);
+                const ptStr = makePtText(ptInfo, target.name);
+                tsumoScoreRes.ptText = ptStr;
+                tsumoScoreRes.diffLabel = ptInfo.diffLabel;
                 tsumoScoreRes.text   = `${handInfo.label}（${getTsumoDesc(handInfo, me.isParent)}）`;
                 tsumoScoreRes.score  = handInfo.ron;
             }
 
-            // ツモ（ポイント）
             if (alreadyLeadInPoint) {
+                const leadGap = totalsBefore[myIndex] - totalsBefore[target.seat];
                 tsumoPointRes = {
                     score: 0,
                     text: "和了するだけでポイントリード維持（すでにトータルトップ）",
                     ptText: "",
                     han: 0,
                     fu: 0,
-                    keepLead: true
+                    keepLead: true,
+                    diffLabel: `差 ${leadGap.toFixed(1)}pt・リード維持`
                 };
             } else {
                 tsumoPointRes = findTsumoPointReverse(
@@ -1104,27 +1074,29 @@
                 );
             }
 
-            // 脇出（点数）
             const needOtherRaw = diff - honba * 300 - pot;
             otherScoreRes = findMinHandForRon(needOtherRaw, me.isParent);
             if (otherScoreRes) {
                 const handInfo = scoreHand(otherScoreRes.han, otherScoreRes.fu, me.isParent);
                 const afterPlayers = simulateSideRon(me, target, players, handInfo.ron, pot, honba);
                 const ptInfo = calcTotalDiff(afterPlayers, me.seat, target.seat, uma, okaPt, returnPoint, totalsBefore);
-                otherScoreRes.ptText = makePtText(ptInfo, target.name);
+                const ptStr = makePtText(ptInfo, target.name);
+                otherScoreRes.ptText = ptStr;
+                otherScoreRes.diffLabel = ptInfo.diffLabel;
                 otherScoreRes.text   = `${handInfo.label}（ロン ${handInfo.ron}点）`;
                 otherScoreRes.score  = handInfo.ron;
             }
 
-            // 脇出（ポイント）
             if (alreadyLeadInPoint) {
+                const leadGap = totalsBefore[myIndex] - totalsBefore[target.seat];
                 otherPointRes = {
                     score: 0,
                     text: "和了するだけでポイントリード維持（すでにトータルトップ）",
                     ptText: "",
                     han: 0,
                     fu: 0,
-                    keepLead: true
+                    keepLead: true,
+                    diffLabel: `差 ${leadGap.toFixed(1)}pt・リード維持`
                 };
             } else {
                 otherPointRes = findMinHandForSideRonPointReverse(
@@ -1164,9 +1136,9 @@
                      </div>`;
             html += `<div id="${cardId}"${bodyStyle}>`;
 
-            html += makeRowDual("直撃", directScoreRes, directPointRes);
-            html += makeRowDual("ツモ", tsumoScoreRes, tsumoPointRes);
-            html += makeRowDual("脇・出", otherScoreRes, otherPointRes, "他家からロン（点数が一番低い他家を放銃者と仮定）");
+            html += makeRowDual("直撃", "点数逆転", "ポイント逆転", directScoreRes, directPointRes);
+            html += makeRowDual("ツモ", "点数逆転", "ポイント逆転", tsumoScoreRes, tsumoPointRes);
+            html += makeRowDual("脇から出あがり", "点数逆転", "ポイント逆転", otherScoreRes, otherPointRes, "他家からロン（点数が一番低い他家を放銃者と仮定）");
 
             const advice = buildAdvice(difficulty, me, target, scoresBefore, totalsBefore, scoreRankBySeat, totalRankBySeat);
             html += `<div class="mini-note"><strong>戦略アドバイス：</strong>${advice}</div>`;
@@ -1230,9 +1202,9 @@
                      </div>`;
             html += `<div id="${cardId}"${bodyStyle}>`;
 
-            html += makeRowDual("直撃", directScoreRes, directPointRes);
-            html += makeRowDual("ツモ", tsumoScoreRes, tsumoPointRes);
-            html += makeRowDual("脇・出", otherScoreRes, otherPointRes, "他家からロン（点数が一番低い他家を放銃者と仮定）");
+            html += makeRowDual("直撃", "点数逆転", "ポイント逆転", directScoreRes, directPointRes);
+            html += makeRowDual("ツモ", "点数逆転", "ポイント逆転", tsumoScoreRes, tsumoPointRes);
+            html += makeRowDual("脇から出あがり", "点数逆転", "ポイント逆転", otherScoreRes, otherPointRes, "他家からロン（点数が一番低い他家を放銃者と仮定）");
 
             const advice = buildAdvice(difficulty, me, target, scoresBefore, totalsBefore, scoreRankBySeat, totalRankBySeat);
             html += `<div class="mini-note"><strong>戦略アドバイス：</strong>${advice}</div>`;
@@ -1249,7 +1221,7 @@
         if (!el) return;
         if (el.style.display === 'none') {
             el.style.display = 'block';
-            if (btn) btn.textContent = "詳細を隿す";
+            if (btn) btn.textContent = "詳細を隠す";
         } else {
             el.style.display = 'none';
             if (btn) btn.textContent = "詳細を表示";
@@ -1324,12 +1296,14 @@
             const afterPlayers = simulateDirectRon(me, target, players, handInfo.ron, pot, honba);
             const ptInfo = calcTotalDiff(afterPlayers, me.seat, target.seat, uma, okaPt, returnPoint, totalsBefore);
             if (ptInfo.diffAfter > 0) {
+                const ptStr = makePtText(ptInfo, target.name);
                 return {
                     score: handInfo.ron,
                     text: `${handInfo.label}（ロン ${handInfo.ron}点）`,
-                    ptText: makePtText(ptInfo, target.name),
+                    ptText: ptStr,
                     han: cand.han,
-                    fu: cand.fu
+                    fu: cand.fu,
+                    diffLabel: ptInfo.diffLabel
                 };
             }
         }
@@ -1351,12 +1325,14 @@
             const afterPlayers = simulateTsumoWithHand(me, players, handInfo, pot, honba);
             const ptInfo = calcTotalDiff(afterPlayers, me.seat, target.seat, uma, okaPt, returnPoint, totalsBefore);
             if (ptInfo.diffAfter > 0) {
+                const ptStr = makePtText(ptInfo, target.name);
                 return {
                     score: handInfo.ron,
                     text: `${handInfo.label}（${getTsumoDesc(handInfo, me.isParent)}）`,
-                    ptText: makePtText(ptInfo, target.name),
+                    ptText: ptStr,
                     han: cand.han,
-                    fu: cand.fu
+                    fu: cand.fu,
+                    diffLabel: ptInfo.diffLabel
                 };
             }
         }
@@ -1378,29 +1354,33 @@
             const afterPlayers = simulateSideRon(me, target, players, handInfo.ron, pot, honba);
             const ptInfo = calcTotalDiff(afterPlayers, me.seat, target.seat, uma, okaPt, returnPoint, totalsBefore);
             if (ptInfo.diffAfter > 0) {
+                const ptStr = makePtText(ptInfo, target.name);
                 return {
                     score: handInfo.ron,
                     text: `${handInfo.label}（ロン ${handInfo.ron}点）`,
-                    ptText: makePtText(ptInfo, target.name),
+                    ptText: ptStr,
                     han: cand.han,
-                    fu: cand.fu
+                    fu: cand.fu,
+                    diffLabel: ptInfo.diffLabel
                 };
             }
         }
         return null;
     }
 
-    function makeRowDual(label, scoreRes, pointRes, extraDesc) {
+    function makeRowDual(mainLabel, scoreLabel, pointLabel, scoreRes, pointRes, extraDesc) {
         if (!scoreRes && !pointRes) {
             return `
-                <div class="condition-row">
-                    <span class="condition-label">${label}</span>
-                    <span class="condition-val" style="color:#95a5a6;">この条件では逆転不可</span>
+                <div class="cond-block">
+                    <div class="condition-row">
+                        <span class="condition-label">${mainLabel}</span>
+                        <span class="condition-val" style="color:#95a5a6;">この条件では逆転不可</span>
+                    </div>
                 </div>
             `;
         }
 
-        let html = `<div class="condition-row"><span class="condition-label">${label}</span><span></span></div>`;
+        let html = `<div class="cond-block"><div class="condition-row"><span class="condition-label">${mainLabel}</span><span></span></div>`;
 
         const sameHand =
             scoreRes && pointRes &&
@@ -1413,14 +1393,17 @@
             let scoreDisplay = scoreRes.score >= 32000
                 ? "役満級"
                 : (scoreRes.score > 0 ? scoreRes.score + "点" : "条件達成済");
+
+            const diffLabel = pointRes && pointRes.diffLabel ? `（${pointRes.diffLabel}）` : "";
+
             html += `
                 <div class="condition-row">
-                    <span class="condition-label condition-label-strong">点数・ポイントともに逆転</span>
+                    <span class="condition-label-strong">${scoreLabel}・${pointLabel}${diffLabel}</span>
                     <span class="condition-val">${scoreDisplay}</span>
                 </div>
                 <div class="condition-detail">
                     ${scoreRes.text}<br>
-                    ${scoreRes.ptText || ""}
+                    ${scoreRes.ptText || pointRes.ptText || ""}
                     ${extraDesc ? "<br>" + extraDesc : ""}
                 </div>
             `;
@@ -1429,9 +1412,10 @@
                 let sd = scoreRes.score >= 32000
                     ? "役満級"
                     : (scoreRes.score > 0 ? scoreRes.score + "点" : "条件達成済");
+                const diffLabel = scoreRes.diffLabel ? `（${scoreRes.diffLabel}）` : "";
                 html += `
                     <div class="condition-row">
-                        <span class="condition-label condition-label-strong">点数逆転</span>
+                        <span class="condition-label-strong">${scoreLabel}${diffLabel}</span>
                         <span class="condition-val">${sd}</span>
                     </div>
                     <div class="condition-detail">
@@ -1443,7 +1427,7 @@
             }
             if (pointRes) {
                 const isKeep = pointRes.keepLead === true;
-                const labelText = isKeep ? "ポイント維持" : "ポイント逆転";
+                const labelText = isKeep ? "ポイント維持" : pointLabel;
                 let pd;
                 if (isKeep) {
                     pd = "和了するだけ";
@@ -1452,9 +1436,10 @@
                         ? "役満級"
                         : (pointRes.score > 0 ? pointRes.score + "点" : "条件達成済");
                 }
+                const diffLabel = pointRes.diffLabel ? `（${pointRes.diffLabel}）` : "";
                 html += `
                     <div class="condition-row">
-                        <span class="condition-label condition-label-strong">${labelText}</span>
+                        <span class="condition-label-strong">${labelText}${diffLabel}</span>
                         <span class="condition-val">${pd}</span>
                     </div>
                     <div class="condition-detail">
@@ -1465,6 +1450,7 @@
                 `;
             }
         }
+        html += `</div>`;
         return html;
     }
 
@@ -1605,6 +1591,9 @@
         if (ptInfo.diffAfter > 0) status = "リード";
         else if (ptInfo.diffAfter < 0) status = "ビハインド";
 
+        const diffAbs = Math.abs(ptInfo.diffAfter).toFixed(1);
+        ptInfo.diffLabel = `差 ${diffAbs}pt・${status}`;
+
         return `この半荘の収支：自分 ${myThis}pt / ${targetName} ${tgThis}pt。　終了時トータル：自分 ${myAfter}pt / ${targetName} ${tgAfter}pt（差 ${diffAfter}pt・${status}）。`;
     }
 
@@ -1670,6 +1659,7 @@
 
         const kyotakuBase = parseInt(document.getElementById('kyotaku').value, 10) || 0;
         const honba   = parseInt(document.getElementById('honba').value, 10) || 0;
+        const riichi  = document.getElementById('riichiFlag').checked;
 
         const returnPoint = parseInt(document.getElementById('returnPoint').value, 10) || 30000;
         const okaPt = parseFloat(document.getElementById('oka').value) || 0;
@@ -1697,6 +1687,10 @@
         }
 
         let kyotaku = kyotakuBase;
+        if (riichi) {
+            players[mySeat].score -= 1000;
+            kyotaku += 1;
+        }
         const pot = kyotaku * 1000;
 
         const me = players[mySeat];
