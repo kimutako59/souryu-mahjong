@@ -260,6 +260,14 @@
         .condition-label {
             color: #7f8c8d;
         }
+        .condition-main-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.95rem;
+            padding: 2px 10px;
+            border-radius: 999px;
+            background: #eaf2ff;
+        }
         .condition-label-strong {
             font-weight: bold;
             color: #34495e;
@@ -355,10 +363,6 @@
                 <input type="number" id="honba" value="0" min="0">
                 <span class="unit">本場</span>
             </div>
-        </div>
-        <div class="input-row">
-            <label>自分はすでにリーチしている（1000点供託）</label>
-            <input type="checkbox" id="riichiFlag">
         </div>
     </div>
 
@@ -938,7 +942,6 @@
 
         let kyotaku = parseInt(document.getElementById('kyotaku').value, 10) || 0;
         const honba   = parseInt(document.getElementById('honba').value, 10) || 0;
-        const riichi  = document.getElementById('riichiFlag').checked;
 
         const resultsDiv = document.getElementById('resultArea');
         resultsDiv.innerHTML = "";
@@ -962,10 +965,6 @@
             totalsBefore[i] = parseFloat(document.getElementById('total' + i).value) || 0;
         }
 
-        if (riichi) {
-            players[myIndex].score -= 1000;
-            kyotaku += 1;
-        }
         const pot = kyotaku * 1000;
 
         const me = players[myIndex];
@@ -1373,14 +1372,14 @@
             return `
                 <div class="cond-block">
                     <div class="condition-row">
-                        <span class="condition-label">${mainLabel}</span>
+                        <span class="condition-main-label">${mainLabel}</span>
                         <span class="condition-val" style="color:#95a5a6;">この条件では逆転不可</span>
                     </div>
                 </div>
             `;
         }
 
-        let html = `<div class="cond-block"><div class="condition-row"><span class="condition-label">${mainLabel}</span><span></span></div>`;
+        let html = `<div class="cond-block"><div class="condition-row"><span class="condition-main-label">${mainLabel}</span><span></span></div>`;
 
         const sameHand =
             scoreRes && pointRes &&
@@ -1543,7 +1542,6 @@
             const before = totalsBefore[seat] || 0;
             totalAfter[seat] = before + (thisHanPtBySeat[seat] || 0);
         }
-
         return {
             myAfter: totalAfter[mySeat],
             targetAfter: totalAfter[targetSeat],
@@ -1659,7 +1657,6 @@
 
         const kyotakuBase = parseInt(document.getElementById('kyotaku').value, 10) || 0;
         const honba   = parseInt(document.getElementById('honba').value, 10) || 0;
-        const riichi  = document.getElementById('riichiFlag').checked;
 
         const returnPoint = parseInt(document.getElementById('returnPoint').value, 10) || 30000;
         const okaPt = parseFloat(document.getElementById('oka').value) || 0;
@@ -1687,10 +1684,6 @@
         }
 
         let kyotaku = kyotakuBase;
-        if (riichi) {
-            players[mySeat].score -= 1000;
-            kyotaku += 1;
-        }
         const pot = kyotaku * 1000;
 
         const me = players[mySeat];
